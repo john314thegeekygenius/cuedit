@@ -16,11 +16,10 @@ clean:
 	rm -f obj/*.o
 
 github:
-	@read -p "Please enter a commit message:" msg
-
 	git add src/*.cpp
 	git add src/*.h
 	git add Makefile
-	git commit -m $msg
+	@read -p "Please enter a commit message:" msg; \
+	git commit -m "$$msg"
 	git push
 
