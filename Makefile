@@ -22,4 +22,5 @@ github:
 	git add src/*.h
 	git add Makefile
 	git commit -m $msg
+	git push
 
