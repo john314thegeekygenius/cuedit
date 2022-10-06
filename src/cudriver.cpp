@@ -9,7 +9,8 @@
 */
 
 
-#include "cudriver.h"
+#include "cuheads.h"
+
 
 CU::Driver::Driver(){
 	// Make sure it's a valid terminal for color
@@ -72,6 +73,16 @@ int CU::Driver::getHeight(){
 	return scrHeight;
 };
 
+void CU::Driver::enableEcho(){
+	// TODO:
+	// Make this enable echoing
+};
+
+void CU::Driver::disableEcho(){
+	// TODO:
+	// Make this disable echoing
+};
+
 void CU::Driver::setCurPos(int x,int y){
 	scrCurPos[0] = x;
 	scrCurPos[1] = y;
@@ -102,6 +113,11 @@ void CU::Driver::setFGColor(CU::Color c){
 	scrBuffer[scrSize+(scrCurPos[1]*scrWidth) + scrCurPos[0]] &= 0x0F;
 	scrBuffer[scrSize+(scrCurPos[1]*scrWidth) + scrCurPos[0]] |= (char)c<<8;
 };
+
+void CU::Driver::putChar(int c){
+	scrBuffer[(scrCurPos[1]*scrWidth) + scrCurPos[0]] = c;	
+};
+
 
 void CU::Driver::clear(){
 	if(scrBuffer.size()){
@@ -148,7 +164,24 @@ void CU::Driver::writeBChar(CU::BlockChar c){
 };
 
 void CU::Driver::drawBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, CU::Color bg){
-
+	int schar = (int)CU::BlockChar::HBAR;
+	for(int e = x; e < x+w; e++){
+		scrBuffer[(y*scrWidth) + e] = (int)schar;
+		scrBuffer[scrSize+(y*scrWidth) + e] = (((int)fg)<<8) | (int)bg;
+		scrBuffer[((y+h-1)*scrWidth) + e] = (int)schar;
+		scrBuffer[scrSize+((y+h-1)*scrWidth) + e] = (((int)fg)<<8) | (int)bg;
+	}
+	schar = (int)CU::BlockChar::VBAR;
+	for(int i = y; i < y+h; i++){
+		scrBuffer[(i*scrWidth) + x] = (int)schar;
+		scrBuffer[scrSize+(i*scrWidth) + x] = (((int)fg)<<8) | (int)bg;
+		scrBuffer[(i*scrWidth) + x + w-1] = (int)schar;
+		scrBuffer[scrSize+(i*scrWidth) + x + w-1] = (((int)fg)<<8) | (int)bg;
+	}
+	scrBuffer[(y*scrWidth) + x] = (int)CU::BlockChar::TLCORNER;
+	scrBuffer[(y*scrWidth) + x + w-1] = (int)CU::BlockChar::TRCORNER;
+	scrBuffer[(y*scrWidth) + x + ((h-1)*scrWidth)] = (int)CU::BlockChar::BLCORNER;
+	scrBuffer[(y*scrWidth) + x + ((h-1)*scrWidth) + w-1] = (int)CU::BlockChar::BRCORNER;
 };
 
 void CU::Driver::drawBar(int x,int y,int w,int h, int floodchar, CU::Color fg, CU::Color bg){
@@ -161,6 +194,24 @@ void CU::Driver::drawBar(int x,int y,int w,int h, int floodchar, CU::Color fg, C
 };
 
 void CU::Driver::writeStr(std::string s, int x,int y){
+	y *= scrWidth;
+	for(char c : s){
+		scrBuffer[(y) + x] = (int)c;
+		x++;
+		// TODO:
+		// Fix overflow????
+	}
+};
+
+void CU::Driver::writeStr(std::string s, int x,int y, CU::Color fg, CU::Color bg){
+	y *= scrWidth;
+	for(char c : s){
+		scrBuffer[(y) + x] = (int)c;
+		scrBuffer[scrSize+(y) + x] = (((int)fg)<<8) | (int)bg;
+		x++;
+		// TODO:
+		// Fix overflow????
+	}
 };
 
 int CU::Driver::kbhit(void) {
@@ -202,5 +253,23 @@ char CU::Driver::getch() {
 	if (tcsetattr(0, TCSADRAIN, &old) < 0)
 			perror ("tcsetattr ~ICANON");
 	return (buf);
+};
+
+int CU::stoi(std::string in_str){
+    int i;
+    char *s = (char*)in_str.c_str();
+    i = 0;
+    while(*s >= '0' && *s <= '9')
+    {
+        i = i * 10 + (*s - '0');
+        s++;
+    }
+    return i;
+};
+
+std::string CU::to_string(int value,int fill){
+	std::stringstream ss;
+	ss << std::setw(fill) << std::setfill('0') << value;
+	return ss.str();
 };
 

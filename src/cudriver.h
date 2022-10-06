@@ -7,6 +7,7 @@
 	10/3/2022
 
 */
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -17,6 +18,9 @@
 #include <termios.h>
 #include <stdbool.h>
 #include <bits/stdc++.h>
+#include <fstream>
+#include <sstream>
+#include <ctime>
 
 namespace CU {
 
@@ -114,22 +118,30 @@ public:
 	void updateDriver();
 	int getWidth();
 	int getHeight();
+	void enableEcho();
+	void disableEcho();
 	void setCurPos(int x,int y);
 //	void hideCursor();
 //	void showCursor();
 	void setBGColor(Color c);
 	void setFGColor(Color c);
+	void putChar(int c);
 	void clear();
 	void flush();
 	void writeBChar(BlockChar c);
 	void drawBox(int x,int y,int w,int h,BlockType t, Color fg = Color::WHITE, Color bg = Color::BLACK);
 	void drawBar(int x,int y,int w,int h, int floodchar = ' ', Color fg = Color::WHITE, Color bg = Color::BLACK);
 	void writeStr(std::string s, int x,int y);
+	void writeStr(std::string s, int x,int y, Color fg, Color bg);
 	
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 	int kbhit();
 	char getch();
 
 };
+
+int stoi(std::string in_str);
+
+std::string to_string(int value,int fill = 1);
 
 };
