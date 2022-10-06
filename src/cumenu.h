@@ -28,6 +28,8 @@ private:
 	int menuHeight = 0;
 
 	CUSettings settings;
+	
+	int tabSelected = -1;
 public:
 	CUMenu();
 	CUMenu(int mx, int my, int w, int h, bool canResize, bool canMinimize, bool canClose);

@@ -18,9 +18,11 @@ private:
 public:
 	CUEditor();
 	void loadSettings();
+	void halt();
 	void run();
 	void drawGUI();
 	void shutdown();
+	void debugWrite(std::string s, CU::DebugMsgType msgType = CU::DebugMsgType::INFO);
 
 };
 

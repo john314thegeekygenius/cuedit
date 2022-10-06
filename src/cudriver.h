@@ -21,6 +21,8 @@
 #include <fstream>
 #include <sstream>
 #include <ctime>
+#include <csignal>
+
 
 namespace CU {
 
@@ -102,6 +104,12 @@ enum class BlockType {
 	TXT = 3,
 };
 
+enum class DebugMsgType {
+	INFO = 0,
+	ERROR = 1,
+	WARN = 2,
+};
+
 class Driver {
 private:
 	int scrWidth = 0;
@@ -110,16 +118,32 @@ private:
 	int scrCurPos[2] = {0,0};
 	bool colorSupported = false;
 
+	volatile bool breakCalled = false;
+	__sighandler_t breakHandle;
+
 	std::vector<short> scrBuffer;
+
+	std::ofstream debugFile;
 public:
 	Driver();
 	~Driver();
+
 	void shutdownDriver();
 	void updateDriver();
+
+	void setupHandle(__sighandler_t handle);
+	void halt();
+	bool halted();
+	void clearHalt();
+
 	int getWidth();
 	int getHeight();
+
 	void enableEcho();
 	void disableEcho();
+
+	void debugWrite(std::string s, DebugMsgType msgType = DebugMsgType::INFO);
+
 	void setCurPos(int x,int y);
 //	void hideCursor();
 //	void showCursor();

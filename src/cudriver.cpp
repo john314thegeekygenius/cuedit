@@ -26,6 +26,17 @@ CU::Driver::Driver(){
 
 	// Hide the "pysical" cursor
 	std::cout << "\x1B[?25l" << std::flush;
+
+	// Bool to check if break happened
+	breakCalled = false;
+
+	// Open a debug file
+	debugFile.open("dbgout.txt");
+	if(!debugFile.is_open()){
+		// Uh... Never mind then.
+	}
+
+	debugWrite("Opened debug file");
 };
 
 CU::Driver::~Driver(){
@@ -43,6 +54,21 @@ void CU::Driver::shutdownDriver(){
 
 	// Show the "pysical" cursor
 	std::cout << "\x1B[?25h" << std::flush;
+
+	// Reset the handler
+    struct sigaction action;
+    action.sa_handler = SIG_DFL;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    sigaction(SIGINT, &action, nullptr);
+
+	// Say goodbye
+	debugWrite("Closed driver");
+
+	// Close the debug file
+	if(debugFile.is_open()){
+		debugFile.close();
+	}
 };
 
 void CU::Driver::updateDriver(){
@@ -65,6 +91,36 @@ void CU::Driver::updateDriver(){
 	setCurPos(0,0);
 };
 
+
+void CU::Driver::setupHandle(__sighandler_t handle){
+	breakHandle = handle;
+	// Add handler for break command
+	struct sigaction sigIntHandler;
+	memset(&sigIntHandler, 0, sizeof(sigIntHandler));
+	sigIntHandler.sa_handler = (__sighandler_t)breakHandle;
+	sigemptyset(&sigIntHandler.sa_mask);
+	sigIntHandler.sa_flags = SA_RESTART;
+	if(sigaction(SIGINT, &sigIntHandler, NULL) || sigaction(SIGQUIT, &sigIntHandler, NULL) || sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL)){
+		halted();
+		debugWrite("Failed to init handler", CU::DebugMsgType::ERROR);
+		return;
+	}
+	debugWrite("Setup Handler");
+};
+
+
+void CU::Driver::halt(){
+	breakCalled = true;
+};
+
+bool CU::Driver::halted(){
+	return breakCalled;
+};
+
+void CU::Driver::clearHalt(){
+	breakCalled = false;
+};
+
 int CU::Driver::getWidth(){
 	return scrWidth;
 };
@@ -81,6 +137,13 @@ void CU::Driver::enableEcho(){
 void CU::Driver::disableEcho(){
 	// TODO:
 	// Make this disable echoing
+};
+
+void CU::Driver::debugWrite(std::string s, CU::DebugMsgType msgType){
+	if(debugFile.is_open()){
+		const std::string errorMsgs[3] = { "INFO", "ERROR", "WARN"};
+		debugFile << errorMsgs[(int)msgType] << ":" << s << std::endl;
+	}
 };
 
 void CU::Driver::setCurPos(int x,int y){

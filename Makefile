@@ -1,4 +1,6 @@
 
+OBJ_FILES := obj/cuedit.o obj/cudriver.o obj/cumenu.o
+
 all: release debug clean
 
 cuedit:
@@ -8,10 +10,10 @@ cuedit:
 	g++ -std=c++20 -c src/cumenu.cpp -o obj/cumenu.o
 
 release: cuedit
-	g++ obj/cuedit.o obj/cudriver.o obj/cumenu.o -o bin/cuedit
+	g++ $(OBJ_FILES) -o bin/cuedit
 
 debug: cuedit
-	g++ -g obj/cuedit.o obj/cudriver.o obj/cumenu.o -o bin/cuedit
+	g++ -g $(OBJ_FILES) -o bin/cuedit_debug
 
 clean:
 	rm -f obj/*.o
