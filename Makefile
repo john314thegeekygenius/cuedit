@@ -29,6 +29,8 @@ clean:
 github:
 	git add src/*.cpp
 	git add src/*.h
+	git add *.code-workspace
+	git add *.md
 	git add Makefile
 	@read -p "Please enter a commit message:" msg; \
 	git commit -m "$$msg"
