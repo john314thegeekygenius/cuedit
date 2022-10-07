@@ -33,13 +33,6 @@ CU::Driver::Driver(){
 	// Bool to check if break happened
 	breakCalled = false;
 
-	// Open a debug file
-	debugFile.open("dbgout.txt");
-	if(!debugFile.is_open()){
-		// Uh... Never mind then.
-	}
-
-	debugWrite("Opened debug file");
 };
 
 CU::Driver::~Driver(){
@@ -47,6 +40,13 @@ CU::Driver::~Driver(){
 	shutdownDriver();
 };
 
+void CU::Driver::setFPS(int fps){
+	targetFPS = fps;
+};
+
+int CU::Driver::getFPS(){
+	return FPS;
+};
 
 void CU::Driver::shutdownDriver(){
 	// Reset color stuff
@@ -68,10 +68,6 @@ void CU::Driver::shutdownDriver(){
 	// Say goodbye
 	debugWrite("Closed driver");
 
-	// Close the debug file
-	if(debugFile.is_open()){
-		debugFile.close();
-	}
 };
 
 void CU::Driver::updateDriver(){
@@ -143,13 +139,6 @@ void CU::Driver::disableEcho(){
 	// Make this disable echoing
 };
 
-void CU::Driver::debugWrite(std::string s, CU::DebugMsgType msgType){
-	if(debugFile.is_open()){
-		const std::string errorMsgs[3] = { "INFO", "ERROR", "WARN"};
-		debugFile << errorMsgs[(int)msgType] << ":" << s << std::endl;
-	}
-};
-
 void CU::Driver::setCurPos(int x,int y){
 	scrCurPos[0] = x;
 	scrCurPos[1] = y;
@@ -196,6 +185,22 @@ void CU::Driver::clear(){
 };
 
 void CU::Driver::flush(){
+	// Wait for the FPS to be correct before we draw the screen
+	using namespace std::chrono;
+	uint64_t vtime_now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	if(vtime_now < vtime_last){
+		return;
+	}
+
+	vtime_last = vtime_now + (1000 / targetFPS);
+
+	if(std::time(0) >= fpsTime){
+		fpsTime = std::time(0) + 1;
+		FPS = frameCount;
+		frameCount = 0;
+	}
+	frameCount += 1;
+
 	char screen_buffer[scrSize*20];
 	int buffer_offset = 0;
 	std::string buffer_string;
@@ -229,11 +234,11 @@ void CU::Driver::flush(){
 	}
 
 	// set the cursor position
-	fprintf(stdout, "\x1b[3J\033[H");
+	std::fputs("\x1b[3J\033[H",stdout);
 	
 	// output the buffer to the screen
-	fprintf(stdout, buffer_string.c_str());
-	fflush(stdout);
+	std::fputs(buffer_string.c_str(),stdout);
+	std::fflush(stdout);
 };
 
 void CU::Driver::writeBChar(CU::BlockChar c){
@@ -243,25 +248,50 @@ void CU::Driver::writeBChar(CU::BlockChar c){
 void CU::Driver::drawBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, CU::Color bg){
 	int schar = (int)CU::BlockChar::HBAR;
 	for(int e = x; e < x+w; e++){
-		scrBuffer[(y*scrWidth) + e] = (int)schar;
-		scrBuffer[scrSize+(y*scrWidth) + e] = (((int)fg)<<8) | (int)bg;
-		scrBuffer[((y+h-1)*scrWidth) + e] = (int)schar;
-		scrBuffer[scrSize+((y+h-1)*scrWidth) + e] = (((int)fg)<<8) | (int)bg;
+		int offset = (y*scrWidth) + e;
+		if(offset > 0 && offset < scrSize){
+			scrBuffer[offset] = (int)schar;
+			scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+		}
+		offset = ((y+h-1)*scrWidth) + e;
+		if(offset > 0 && offset < scrSize){
+			scrBuffer[offset] = (int)schar;
+			scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+		}
 	}
 	schar = (int)CU::BlockChar::VBAR;
 	for(int i = y; i < y+h; i++){
-		scrBuffer[(i*scrWidth) + x] = (int)schar;
-		scrBuffer[scrSize+(i*scrWidth) + x] = (((int)fg)<<8) | (int)bg;
-		scrBuffer[(i*scrWidth) + x + w-1] = (int)schar;
-		scrBuffer[scrSize+(i*scrWidth) + x + w-1] = (((int)fg)<<8) | (int)bg;
+		int offset = (i*scrWidth) + x;
+		if(offset > 0 && offset < scrSize){
+			scrBuffer[offset] = (int)schar;
+			scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+		}
+		offset = (i*scrWidth) + x + w -1;
+		if(offset > 0 && offset < scrSize){
+			scrBuffer[offset] = (int)schar;
+			scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+		}
 	}
-	scrBuffer[(y*scrWidth) + x] = (int)CU::BlockChar::TLCORNER;
-	scrBuffer[(y*scrWidth) + x + w-1] = (int)CU::BlockChar::TRCORNER;
-	scrBuffer[(y*scrWidth) + x + ((h-1)*scrWidth)] = (int)CU::BlockChar::BLCORNER;
-	scrBuffer[(y*scrWidth) + x + ((h-1)*scrWidth) + w-1] = (int)CU::BlockChar::BRCORNER;
+	int offset = (y*scrWidth) + x;
+	if(offset > 0 && offset < scrSize){
+		scrBuffer[offset] = (int)CU::BlockChar::TLCORNER;
+	}
+	offset = (y*scrWidth) + x + w-1;
+	if(offset > 0 && offset < scrSize){
+		scrBuffer[offset] = (int)CU::BlockChar::TRCORNER;
+	}
+	offset = (y*scrWidth) + x + ((h-1)*scrWidth);
+	if(offset > 0 && offset < scrSize){
+		scrBuffer[offset] = (int)CU::BlockChar::BLCORNER;
+	}
+	offset = (y*scrWidth) + x + ((h-1)*scrWidth) + w-1;
+	if(offset > 0 && offset < scrSize){
+		scrBuffer[offset] = (int)CU::BlockChar::BRCORNER;
+	}
 };
 
 void CU::Driver::drawBar(int x,int y,int w,int h, int floodchar, CU::Color fg, CU::Color bg){
+	CU::Clamp(x,y,w,h,0,0,scrWidth,scrHeight);
 	for(int i = y; i < y+h; i++){
 		for(int e = x; e < x+w; e++){
 			scrBuffer[(i*scrWidth) + e] = (int)floodchar;	
@@ -348,3 +378,40 @@ std::string CU::to_string(int value,int fill){
 	return ss.str();
 };
 
+void CU::Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int maxh){
+	if(x < minx) { x = minx; }
+	if(y < miny) { y = miny; }
+	if(w > maxw) { w = maxw; }
+	if(h > maxh) { h = maxh; }
+	if(w < 0) { w = 0; }
+	if(h < 0) { h = 0; }
+	if(x > w) { x = w; }
+	if(y > h) { y = h; }
+};
+
+
+
+std::ofstream debugFile;
+
+void CU::openDebugFile(){
+	// Open a debug file
+	debugFile.open("dbgout.txt");
+	if(!debugFile.is_open()){
+		// Uh... Never mind then.
+	}
+	debugWrite("Opened debug file");	
+};
+
+void CU::closeDebugFile(){
+	// Close the debug file
+	if(debugFile.is_open()){
+		debugFile.close();
+	}
+};
+
+void CU::debugWrite(std::string s, CU::DebugMsgType msgType){
+	if(debugFile.is_open()){
+		const std::string errorMsgs[3] = { "INFO", "ERROR", "WARN"};
+		debugFile << errorMsgs[(int)msgType] << ":" << s << std::endl;
+	}
+};

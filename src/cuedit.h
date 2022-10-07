@@ -13,16 +13,16 @@ private:
 	CU::Driver videoDriver;
 	CUSettings settings;
 	bool running = false;
+	bool MainMenuTabsSelected = false;
 	
 	std::vector<CUMenu> menuList;
 public:
-	CUEditor();
+	void init();
 	void loadSettings();
 	void halt(int e);
 	void run();
 	void drawGUI();
 	void shutdown();
-	void debugWrite(std::string s, CU::DebugMsgType msgType = CU::DebugMsgType::INFO);
 
 };
 

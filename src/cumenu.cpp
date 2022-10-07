@@ -27,6 +27,8 @@ void CUMenu::init(int mx, int my, int w, int h, bool resize, bool minimize, bool
 	canMinimize = minimize;
 	canClose = close;
 	tabSelected = -1;
+	settings.init();
+	CU::debugWrite("Initalized window at " + std::to_string(mx)+","+std::to_string(my));
 };
 
 void CUMenu::copySettings(CUSettings &set){
@@ -35,6 +37,10 @@ void CUMenu::copySettings(CUSettings &set){
 
 void CUMenu::addTab(CUMenu_t &tab){
 	tabs.push_back(tab);
+};
+
+void CUMenu::selectTab(int tabid){
+	tabSelected = tabid;
 };
 
 void CUMenu::drawTab(CU::Driver &videoDriver, std::string name, int x,int y, bool selected){

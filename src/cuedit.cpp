@@ -17,12 +17,15 @@ CUEditor editor;
 
 void breakHandle(int e){
 	editor.halt(e);
-	editor.debugWrite("int "+std::to_string(e));
+	CU::debugWrite("int "+std::to_string(e));
 };
 
 int main(int argc, char *argv[]){
+	CU::openDebugFile();
+	editor.init();
 	editor.run();
 	editor.shutdown();
+	CU::closeDebugFile();
 	return 0;
 };
 
@@ -41,11 +44,12 @@ CUMenu_t MM_Sub_Project = {
 };
 
 
-CUEditor::CUEditor(){
+void CUEditor::init(){
 	running = true;
 
 	// Setup the break handler
 	videoDriver.setupHandle(&breakHandle);
+	videoDriver.setFPS(30);
 
 	loadSettings();
 	
@@ -71,14 +75,23 @@ void CUEditor::run(){
 
 		if(videoDriver.kbhit()){
 			char ch = videoDriver.getch();
+			if(ch == 27){
+				// Handle Escape
+
+				// TODO:
+				// Check for cases where this would not work
+				MainMenuTabsSelected = !MainMenuTabsSelected;
+				if(MainMenuTabsSelected){
+					mainMenu.selectTab(0);
+				}else{
+					mainMenu.selectTab(-1);
+				}
+			}
 			if(ch == ' '){
 				running = false;
 			}
-			debugWrite("Key pressed "+std::to_string(ch));
+			CU::debugWrite("Key pressed "+std::to_string(ch));
 		}
-		videoDriver.flush();
-		//videoDriver.updateDriver();
-
 		// Handle the user breaking the program
 		switch((CUBreakType)videoDriver.halted()){
 			case CUBreakType::SAVE_EXIT:
@@ -95,7 +108,12 @@ void CUEditor::run(){
 				// Undo changes until the buffer is empty
 				break;
 		}
+
 		videoDriver.clearHalt();
+
+		videoDriver.flush();
+		//videoDriver.updateDriver();
+
 	}
 
 };
@@ -108,10 +126,6 @@ void CUEditor::halt(int e){
 	videoDriver.halt(e);
 };
 
-void CUEditor::debugWrite(std::string s, CU::DebugMsgType msgType){
-	videoDriver.debugWrite(s,msgType);
-}
-
 void CUEditor::drawGUI(){
 	// Clear the screen
 	videoDriver.clear();
@@ -120,13 +134,7 @@ void CUEditor::drawGUI(){
 	videoDriver.drawBar(0,0,videoDriver.getWidth(), 1, ' ', settings.head_fg_color, settings.head_bg_color);
 
 	// Write the IDE name
-	videoDriver.writeStr("CU Edit IDE ",0,0);
-/*
-	if(videoDriver.getWidth() > CU_EDIT_MIN_WIDTH){
-		videoDriver.writeStr("CU Edit IDE ",0,0);
-	}else{
-		videoDriver.writeStr("CU IDE ",0,0);
-	}*/
+	videoDriver.writeStr("CU Edit IDE "+std::to_string(videoDriver.getFPS()),0,0);
 
 	// Write the current time
 	std::time_t t = std::time(0);
@@ -141,14 +149,6 @@ void CUEditor::drawGUI(){
 	timestr += CU::to_string(hour,2) + ':';
 	timestr += CU::to_string(minute,2) +':';
 	timestr += CU::to_string(second,2);
-	
-	/*
-	if(videoDriver.getWidth() <= CU_EDIT_MIN_WIDTH){
-		// Remove the seconds
-		timestr.pop_back();
-		timestr.pop_back();
-		timestr.pop_back();
-	}*/
 	
 	// Center the time
 	videoDriver.writeStr(timestr,(videoDriver.getWidth()>>1) - (timestr.length() >> 1) ,0);
@@ -165,30 +165,12 @@ void CUEditor::drawGUI(){
 	datestr += CU::to_string(day,2) +'/';
 	datestr += CU::to_string(year,4);
 	
-	/*
-	if(videoDriver.getWidth() <= CU_EDIT_MIN_WIDTH){
-		// Remove the year
-		datestr.pop_back();
-		datestr.pop_back();
-		datestr.pop_back();
-		datestr.pop_back();
-		datestr.pop_back();
-	}*/
-	
 	// Center the time
 	videoDriver.writeStr(datestr, (videoDriver.getWidth() - datestr.length()) ,0);
 
 	// Draw the menus
-	return;
 	mainMenu.draw(videoDriver);
-	
-	for(int i = 0; i < 16; i++){
-		videoDriver.setCurPos(4+i,2);
-		videoDriver.setBGColor((CU::Color)i);
-		videoDriver.setCurPos(4+i,3);
-		videoDriver.setFGColor((CU::Color)i);
-		videoDriver.putChar('#');
-	}
+
 };
 
 

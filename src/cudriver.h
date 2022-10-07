@@ -22,7 +22,7 @@
 #include <sstream>
 #include <ctime>
 #include <csignal>
-
+#include <chrono>
 
 namespace CU {
 
@@ -110,6 +110,7 @@ enum class DebugMsgType {
 	WARN = 2,
 };
 
+
 class Driver {
 private:
 	int scrWidth = 0;
@@ -123,10 +124,20 @@ private:
 
 	std::vector<short> scrBuffer;
 
-	std::ofstream debugFile;
+	// Write the current time
+	uint64_t vtime_last = 0;
+
+	std::time_t fpsTime;
+	int FPS = 0;
+	int targetFPS = 60;
+	int frameCount = 0;
+
 public:
 	Driver();
 	~Driver();
+
+	void setFPS(int fps);
+	int getFPS();
 
 	void shutdownDriver();
 	void updateDriver();
@@ -141,8 +152,6 @@ public:
 
 	void enableEcho();
 	void disableEcho();
-
-	void debugWrite(std::string s, DebugMsgType msgType = DebugMsgType::INFO);
 
 	void setCurPos(int x,int y);
 //	void hideCursor();
@@ -168,5 +177,13 @@ public:
 int stoi(std::string in_str);
 
 std::string to_string(int value,int fill = 1);
+
+void Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int maxh);
+
+void debugWrite(std::string s, DebugMsgType msgType = DebugMsgType::INFO);
+
+void openDebugFile();
+
+void closeDebugFile();
 
 };

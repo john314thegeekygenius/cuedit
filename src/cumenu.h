@@ -36,6 +36,7 @@ public:
 	void init(int mx, int my, int w, int h, bool canResize, bool canMinimize, bool canClose);
 	void addTab(CUMenu_t &tab);
 	void copySettings(CUSettings &set);
+	void selectTab(int tabid);
 	void drawTab(CU::Driver &videoDriver, std::string name, int x,int y, bool selected);
 	void draw(CU::Driver &videoDriver);
 };
