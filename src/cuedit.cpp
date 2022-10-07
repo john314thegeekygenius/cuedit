@@ -30,17 +30,51 @@ int main(int argc, char *argv[]){
 };
 
 CUMenu mainMenu;
+
+int MMS_FOpen(){
+	return 0;
+};
+
+std::vector<CUSubMenu_t> MM_LFile = {
+	{"Open", &MMS_FOpen}, 
+	{"Save", &CUMenuFNULL}, 
+	{"Save As", &CUMenuFNULL}, 
+	{"Reload", &CUMenuFNULL}, 
+	{"Close", &CUMenuFNULL}, 
+	{"Exit", &CUMenuFNULL},
+};
+
 CUMenu_t MM_Sub_File = {
-	"File", { "Open", "Save", "Save As", "Reload", "Close", "Exit"},
+	"File", MM_LFile
 };
+
+std::vector<CUSubMenu_t> MM_LEdit = {
+	{"Undo", &MMS_FOpen}, 
+	{"Redo", &CUMenuFNULL}, 
+	{"Copy", &CUMenuFNULL}, 
+	{"Cut", &CUMenuFNULL}, 
+	{"Paste", &CUMenuFNULL}, 
+};
+
 CUMenu_t MM_Sub_Edit = {
-	"Edit", { "Undo", "Redo", "Copy", "Cut", "Paste"},
+	"Edit", MM_LEdit
 };
+
 CUMenu_t MM_Sub_Settings = {
 	"Settings", {},
 };
+
+std::vector<CUSubMenu_t> MM_LProject = {
+	{"Open", &MMS_FOpen}, 
+	{"Save", &CUMenuFNULL}, 
+	{"Save As", &CUMenuFNULL}, 
+	{"Reload", &CUMenuFNULL}, 
+	{"Close", &CUMenuFNULL}, 
+	{"Settings", &CUMenuFNULL}, 
+};
+
 CUMenu_t MM_Sub_Project = {
-	"Project", { "Open", "Save", "Save As", "Reload", "Close", "Settings", "Exit"},
+	"Project", MM_LProject
 };
 
 
@@ -73,24 +107,69 @@ void CUEditor::run(){
 		
 		drawGUI();
 
-		if(videoDriver.kbhit()){
-			char ch = videoDriver.getch();
-			if(ch == 27){
-				// Handle Escape
+		CU::keyCode key = videoDriver.getkey();
 
-				// TODO:
-				// Check for cases where this would not work
-				MainMenuTabsSelected = !MainMenuTabsSelected;
-				if(MainMenuTabsSelected){
-					mainMenu.selectTab(0);
+		if(key == CU::keyCode::k_escape){
+			// TODO:
+			// Check for cases where this would not work
+			MainMenuTabsSelected = !MainMenuTabsSelected;
+			if(MainMenuTabsSelected){
+				mainMenu.selectTab(0);
+			}else{
+				mainMenu.closeTab(mainMenu.getTab());
+				mainMenu.selectTab(-1);
+			}
+		}
+		if(key == CU::keyCode::s_left){
+			if(MainMenuTabsSelected){
+				mainMenu.closeTab(mainMenu.getTab());
+				int cur = mainMenu.getTab() - 1;
+				if(cur < 0) { cur = 0; }
+				mainMenu.selectTab(cur);
+			}
+		}
+		if(key == CU::keyCode::s_right){
+			if(MainMenuTabsSelected){
+				mainMenu.closeTab(mainMenu.getTab());
+				int cur = mainMenu.getTab() + 1;
+				if(cur >= mainMenu.numTabs()) { cur = mainMenu.numTabs()-1; }
+				mainMenu.selectTab(cur);
+			}
+		}
+		if(key == CU::keyCode::k_tab){
+			if(MainMenuTabsSelected){
+				mainMenu.closeTab(mainMenu.getTab());
+				int cur = mainMenu.getTab() + 1;
+				if(cur >= mainMenu.numTabs()) { cur = 0; }
+				mainMenu.selectTab(cur);
+			}
+		}
+		if(key == CU::keyCode::k_enter){
+			if(MainMenuTabsSelected){
+				if(mainMenu.tabOpen(mainMenu.getTab())){
+					mainMenu.closeTab(mainMenu.getTab());
+					// Run the sub function for that menu
 				}else{
-					mainMenu.selectTab(-1);
+					mainMenu.openTab(mainMenu.getTab());
 				}
 			}
-			if(ch == ' '){
-				running = false;
+		}
+		if(key == CU::keyCode::s_up){
+			if(MainMenuTabsSelected){
+				if(mainMenu.tabOpen(mainMenu.getTab())){
+					mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())-1);
+				}
 			}
-			CU::debugWrite("Key pressed "+std::to_string(ch));
+		}
+		if(key == CU::keyCode::s_down){
+			if(MainMenuTabsSelected){
+				if(mainMenu.tabOpen(mainMenu.getTab())){
+					mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())+1);
+				}
+			}
+		}
+		if(key == CU::keyCode::k_space){
+			running = false;
 		}
 		// Handle the user breaking the program
 		switch((CUBreakType)videoDriver.halted()){
@@ -134,7 +213,7 @@ void CUEditor::drawGUI(){
 	videoDriver.drawBar(0,0,videoDriver.getWidth(), 1, ' ', settings.head_fg_color, settings.head_bg_color);
 
 	// Write the IDE name
-	videoDriver.writeStr("CU Edit IDE "+std::to_string(videoDriver.getFPS()),0,0);
+	videoDriver.writeStr("CU Edit IDE",0,0);
 
 	// Write the current time
 	std::time_t t = std::time(0);

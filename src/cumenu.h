@@ -10,9 +10,22 @@
 
 #include "cuheads.h"
 
+typedef int (*CUMenuFunction)();
+
+extern int CUMenuFNULL();
+
+typedef struct CUSubMenu_t {
+	std::string title;
+	CUMenuFunction callback = nullptr;
+}CUSubMenu_t;
+
 typedef struct CUMenu_t{
 	std::string name;
-	std::vector<std::string> submenu;
+	std::vector<CUSubMenu_t> submenu;
+	int subMenuWidth;
+
+	bool open;
+	int subselect = 0;
 }CUMenu_t;
 
 class CUMenu {
@@ -37,6 +50,17 @@ public:
 	void addTab(CUMenu_t &tab);
 	void copySettings(CUSettings &set);
 	void selectTab(int tabid);
+	int getTab();
+	int numTabs();
+
+	bool tabOpen(int tab);
+	void closeTab(int tab);
+	void openTab(int tab);
+
+	void selectMenu(int tab, int sub);
+	int curSubMenu(int tab);
+
+	void drawSub(CU::Driver &videoDriver, int x, int y, CUMenu_t &tab, int subselect);
 	void drawTab(CU::Driver &videoDriver, std::string name, int x,int y, bool selected);
 	void draw(CU::Driver &videoDriver);
 };

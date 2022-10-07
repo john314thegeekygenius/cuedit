@@ -24,6 +24,9 @@ CU::Driver::Driver(){
 	// Disable keyboard delay
 	kbNoDelay();
 
+	// Disable echoing
+	disableEcho();
+
 	// Update the variables
 	updateDriver();
 
@@ -49,6 +52,9 @@ int CU::Driver::getFPS(){
 };
 
 void CU::Driver::shutdownDriver(){
+	// Enable echo
+	enableEcho();
+
 	// Reset color stuff
 	std::cout << "\033[0m" << std::flush;
 
@@ -130,13 +136,19 @@ int CU::Driver::getHeight(){
 };
 
 void CU::Driver::enableEcho(){
-	// TODO:
-	// Make this enable echoing
+    struct termios term;
+    tcgetattr(fileno(stdin), &term);
+
+    term.c_lflag |= ECHO;
+    tcsetattr(fileno(stdin), 0, &term);
 };
 
 void CU::Driver::disableEcho(){
-	// TODO:
-	// Make this disable echoing
+    struct termios term;
+    tcgetattr(fileno(stdin), &term);
+
+    term.c_lflag &= ~ECHO;
+    tcsetattr(fileno(stdin), 0, &term);
 };
 
 void CU::Driver::setCurPos(int x,int y){
@@ -334,30 +346,72 @@ void CU::Driver::kbNoDelay(){
 
 int CU::Driver::kbhit(void) {
     int nbbytes;
-	kbNoDelay();
     ioctl(0, FIONREAD, &nbbytes);  // 0 is STDIN
     return nbbytes;
 };
 
 char CU::Driver::getch() {
-	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 	char buf = 0;
-	struct termios old = {0};
-	if (tcgetattr(0, &old) < 0)
-			perror("tcsetattr()");
-	old.c_lflag &= ~ICANON;
-	old.c_lflag &= ~ECHO;
-	old.c_cc[VMIN] = 1;
-	old.c_cc[VTIME] = 0;
-	if (tcsetattr(0, TCSANOW, &old) < 0)
-			perror("tcsetattr ICANON");
-	if (read(0, &buf, 1) < 0)
-			perror ("read()");
-	old.c_lflag |= ICANON;
-	old.c_lflag |= ECHO;
-	if (tcsetattr(0, TCSADRAIN, &old) < 0)
-			perror ("tcsetattr ~ICANON");
+	read(0, &buf, 1);
+	debugWrite("Raw:"+std::to_string(buf));
 	return (buf);
+};
+
+CU::keyCode CU::Driver::getkey() {
+	int key = (int)CU::keyCode::k_null;
+	int keyCount = kbhit();
+
+	if(keyCount){
+		char ch = getch(); 
+
+		// Handle Escape codes (Special keys)
+		if(ch == 0x1b){
+			if(keyCount>1){
+				char specialcheck = getch();
+				if(specialcheck == 0x5b){
+					if(keyCount>3){
+						specialcheck = getch();
+						if(specialcheck == 0x31){
+							specialcheck = getch();
+							if(specialcheck == 0x3b){
+								// Read the special key
+								ch = getch();
+								if(ch == 50) {
+									key |= (int)CU::keyCode::c_shift;
+								}
+								if(ch == 51) {
+									key |= (int)CU::keyCode::c_alt;
+								}
+								if(ch == 53) {
+									key |= (int)CU::keyCode::c_ctrl;
+								}
+							}
+						}
+					}
+					ch = getch();
+					// Set to the correct keycode
+					if(ch == 65){
+						key |= (int)CU::keyCode::s_up;
+					}
+					if(ch == 66){
+						key |= (int)CU::keyCode::s_down;
+					}
+					if(ch == 67){
+						key |= (int)CU::keyCode::s_right;
+					}
+					if(ch == 68){
+						key |= (int)CU::keyCode::s_left;
+					}
+				}
+			}else{
+				key = (int)CU::keyCode::k_escape;
+			}
+		}else{
+			key = ch;
+		}
+		CU::debugWrite("Key pressed "+std::to_string(ch));
+	}
+	return (CU::keyCode)key;
 };
 
 int CU::stoi(std::string in_str){

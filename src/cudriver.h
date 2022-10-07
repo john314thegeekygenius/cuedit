@@ -171,6 +171,7 @@ public:
 	void kbNoDelay();
 	int kbhit();
 	char getch();
+	keyCode getkey();
 
 };
 

@@ -8,6 +8,7 @@
 */
 #pragma once
 
+
 class CUEditor {
 private:
 	CU::Driver videoDriver;
