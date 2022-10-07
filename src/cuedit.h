@@ -18,7 +18,7 @@ private:
 public:
 	CUEditor();
 	void loadSettings();
-	void halt();
+	void halt(int e);
 	void run();
 	void drawGUI();
 	void shutdown();

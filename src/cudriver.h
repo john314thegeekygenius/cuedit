@@ -118,7 +118,7 @@ private:
 	int scrCurPos[2] = {0,0};
 	bool colorSupported = false;
 
-	volatile bool breakCalled = false;
+	volatile int breakCalled = 0;
 	__sighandler_t breakHandle;
 
 	std::vector<short> scrBuffer;
@@ -132,8 +132,8 @@ public:
 	void updateDriver();
 
 	void setupHandle(__sighandler_t handle);
-	void halt();
-	bool halted();
+	void halt(int e);
+	int halted();
 	void clearHalt();
 
 	int getWidth();
@@ -159,6 +159,7 @@ public:
 	void writeStr(std::string s, int x,int y, Color fg, Color bg);
 	
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
+	void kbNoDelay();
 	int kbhit();
 	char getch();
 

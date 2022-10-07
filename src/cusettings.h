@@ -9,9 +9,10 @@
 #pragma once
 
 enum class CUBreakType {
-	COPY = 0,
-	EXIT = 1,
-	SAVE_EXIT = 2,
+	COPY = 2,
+	UNDO = 20,
+	SAVE_EXIT = 3,
+//	EXIT = 3,
 };
 
 typedef struct CUSettings {

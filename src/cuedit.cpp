@@ -16,8 +16,8 @@
 CUEditor editor;
 
 void breakHandle(int e){
-	editor.halt();
-//	editor.debugWrite("Interrupt!");
+	editor.halt(e);
+	editor.debugWrite("int "+std::to_string(e));
 };
 
 int main(int argc, char *argv[]){
@@ -74,26 +74,28 @@ void CUEditor::run(){
 			if(ch == ' '){
 				running = false;
 			}
+			debugWrite("Key pressed "+std::to_string(ch));
 		}
 		videoDriver.flush();
 		//videoDriver.updateDriver();
 
 		// Handle the user breaking the program
-		if(videoDriver.halted()){
-			if(settings.handleBreak == CUBreakType::EXIT){
-				running = false;
-			}
-			if(settings.handleBreak == CUBreakType::SAVE_EXIT){
+		switch((CUBreakType)videoDriver.halted()){
+			case CUBreakType::SAVE_EXIT:
 				// TODO:
 				// Save the project
 				running = false;
-			}
-			if(settings.handleBreak == CUBreakType::COPY){
+			break;
+			case CUBreakType::COPY:
 				// TODO:
 				// Copy selected text to clipboard
-			}
-			videoDriver.clearHalt();
+				break;
+			case CUBreakType::UNDO:
+				// TODO:
+				// Undo changes until the buffer is empty
+				break;
 		}
+		videoDriver.clearHalt();
 	}
 
 };
@@ -102,8 +104,8 @@ void CUEditor::shutdown(){
 
 };
 
-void CUEditor::halt(){
-	videoDriver.halt();
+void CUEditor::halt(int e){
+	videoDriver.halt(e);
 };
 
 void CUEditor::debugWrite(std::string s, CU::DebugMsgType msgType){

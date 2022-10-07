@@ -21,6 +21,9 @@ CU::Driver::Driver(){
 		colorSupported = true;
 	}
 	
+	// Disable keyboard delay
+	kbNoDelay();
+
 	// Update the variables
 	updateDriver();
 
@@ -100,7 +103,8 @@ void CU::Driver::setupHandle(__sighandler_t handle){
 	sigIntHandler.sa_handler = (__sighandler_t)breakHandle;
 	sigemptyset(&sigIntHandler.sa_mask);
 	sigIntHandler.sa_flags = SA_RESTART;
-	if(sigaction(SIGINT, &sigIntHandler, NULL) || sigaction(SIGQUIT, &sigIntHandler, NULL) || sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL)){
+	if(sigaction(SIGINT, &sigIntHandler, NULL) || sigaction(SIGTSTP, &sigIntHandler, NULL) || sigaction(SIGQUIT, &sigIntHandler, NULL) || 
+		sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL)){
 		halted();
 		debugWrite("Failed to init handler", CU::DebugMsgType::ERROR);
 		return;
@@ -109,16 +113,16 @@ void CU::Driver::setupHandle(__sighandler_t handle){
 };
 
 
-void CU::Driver::halt(){
-	breakCalled = true;
+void CU::Driver::halt(int e){
+	breakCalled = e;
 };
 
-bool CU::Driver::halted(){
+int CU::Driver::halted(){
 	return breakCalled;
 };
 
 void CU::Driver::clearHalt(){
-	breakCalled = false;
+	breakCalled = 0;
 };
 
 int CU::Driver::getWidth(){
@@ -192,10 +196,10 @@ void CU::Driver::clear(){
 };
 
 void CU::Driver::flush(){
-	// set the cursor position
-	std::cout << "\x1b[3J\033[H";
-	
-	// output the buffer to the screen
+	char screen_buffer[scrSize*20];
+	int buffer_offset = 0;
+	std::string buffer_string;
+
 	for(int y = 0; y < scrHeight; y++){
 		for(int x = 0; x < scrWidth; x++){
 			if(colorSupported){
@@ -204,22 +208,32 @@ void CU::Driver::flush(){
 				if(bg > 47){
 					bg -= 8; // There is no bright backgrounds?
 				}
-				std::cout << "\x1B[" << bg << "m";
+				buffer_string += "\x1B[";
+				buffer_string += std::to_string(bg);
+				buffer_string += "m";
 				if(fg > 37){
 					fg += 52;
 				}
-				std::cout << "\x1B[" << fg <<"m";
+				buffer_string += "\x1B[";
+				buffer_string += std::to_string(fg);
+				buffer_string += "m";
 			}
 
 			int C = scrBuffer[(y*scrWidth) + x];
 			if(C & 0x8000){
-				std::cout << CU::UNIBlockChars[C&0xFF];
+				buffer_string += CU::UNIBlockChars[C&0xFF];
 			}else{
-				std::cout << (char)(C?C:' ');
+				buffer_string += (char)(C?C:' ');
 			}
 		}
 	}
 
+	// set the cursor position
+	fprintf(stdout, "\x1b[3J\033[H");
+	
+	// output the buffer to the screen
+	fprintf(stdout, buffer_string.c_str());
+	fflush(stdout);
 };
 
 void CU::Driver::writeBChar(CU::BlockChar c){
@@ -277,25 +291,23 @@ void CU::Driver::writeStr(std::string s, int x,int y, CU::Color fg, CU::Color bg
 	}
 };
 
-int CU::Driver::kbhit(void) {
+void CU::Driver::kbNoDelay(){
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
-    static bool initflag = false;
-    static const int STDIN = 0;
+	// Use termios to turn off line buffering
+	struct termios term;
+	tcgetattr(0, &term); // 0 is STDIN
+	term.c_lflag &= ~ICANON;
+	tcsetattr(0, TCSANOW, &term); // 0 is STDIN
+	setbuf(stdin, NULL);
 
-    if (!initflag) {
-        // Use termios to turn off line buffering
-        struct termios term;
-        tcgetattr(STDIN, &term);
-        term.c_lflag &= ~ICANON;
-        tcsetattr(STDIN, TCSANOW, &term);
-        setbuf(stdin, NULL);
-        initflag = true;
-    }
+};
 
+int CU::Driver::kbhit(void) {
     int nbbytes;
-    ioctl(STDIN, FIONREAD, &nbbytes);  // 0 is STDIN
+	kbNoDelay();
+    ioctl(0, FIONREAD, &nbbytes);  // 0 is STDIN
     return nbbytes;
-}
+};
 
 char CU::Driver::getch() {
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
