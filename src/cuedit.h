@@ -22,6 +22,7 @@ public:
 	void loadSettings();
 	void halt(int e);
 	void run();
+	void close();
 	void drawGUI();
 	void shutdown();
 

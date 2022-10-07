@@ -103,6 +103,17 @@ int CUMenu::curSubMenu(int tab){
 	return 0; // ???
 };
 
+int CUMenu::runSubMenu(int tab, int sub){
+	if(tab >= 0 && tab < tabs.size()){
+		if(sub >= 0 && sub < tabs[tab].submenu.size()) {
+			if(tabs[tab].submenu[sub].callback != nullptr){
+				return tabs[tab].submenu[sub].callback();
+			}
+		}
+	}
+	return -1; // Bad function?
+};
+
 void CUMenu::drawTab(CU::Driver &videoDriver, std::string name, int x,int y, bool selected){
 	if(selected){
 		name = name.insert(0,1,'<');

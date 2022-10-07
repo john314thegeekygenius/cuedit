@@ -59,6 +59,7 @@ public:
 
 	void selectMenu(int tab, int sub);
 	int curSubMenu(int tab);
+	int runSubMenu(int tab, int sub);
 
 	void drawSub(CU::Driver &videoDriver, int x, int y, CUMenu_t &tab, int subselect);
 	void drawTab(CU::Driver &videoDriver, std::string name, int x,int y, bool selected);

@@ -32,6 +32,7 @@ github:
 	git add *.code-workspace
 	git add *.md
 	git add Makefile
+	git add bin
 	@read -p "Please enter a commit message:" msg; \
 	git commit -m "$$msg"
 	git push

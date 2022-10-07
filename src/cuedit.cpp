@@ -35,13 +35,23 @@ int MMS_FOpen(){
 	return 0;
 };
 
+int MMS_POpen(){
+	return 0;
+};
+
+int MMS_FExit(){
+	editor.close();
+	CU::debugWrite("Quiting Program");
+	return 0;
+};
+
 std::vector<CUSubMenu_t> MM_LFile = {
 	{"Open", &MMS_FOpen}, 
 	{"Save", &CUMenuFNULL}, 
 	{"Save As", &CUMenuFNULL}, 
 	{"Reload", &CUMenuFNULL}, 
 	{"Close", &CUMenuFNULL}, 
-	{"Exit", &CUMenuFNULL},
+	{"Exit", &MMS_FExit},
 };
 
 CUMenu_t MM_Sub_File = {
@@ -49,7 +59,7 @@ CUMenu_t MM_Sub_File = {
 };
 
 std::vector<CUSubMenu_t> MM_LEdit = {
-	{"Undo", &MMS_FOpen}, 
+	{"Undo", &CUMenuFNULL}, 
 	{"Redo", &CUMenuFNULL}, 
 	{"Copy", &CUMenuFNULL}, 
 	{"Cut", &CUMenuFNULL}, 
@@ -65,7 +75,7 @@ CUMenu_t MM_Sub_Settings = {
 };
 
 std::vector<CUSubMenu_t> MM_LProject = {
-	{"Open", &MMS_FOpen}, 
+	{"Open", &MMS_POpen}, 
 	{"Save", &CUMenuFNULL}, 
 	{"Save As", &CUMenuFNULL}, 
 	{"Reload", &CUMenuFNULL}, 
@@ -98,6 +108,10 @@ void CUEditor::init(){
 	mainMenu.addTab(MM_Sub_Edit);
 	mainMenu.addTab(MM_Sub_Settings);
 	mainMenu.addTab(MM_Sub_Project);
+};
+
+void CUEditor::close(){
+	running = false;
 };
 
 void CUEditor::run(){
@@ -147,8 +161,10 @@ void CUEditor::run(){
 		if(key == CU::keyCode::k_enter){
 			if(MainMenuTabsSelected){
 				if(mainMenu.tabOpen(mainMenu.getTab())){
-					mainMenu.closeTab(mainMenu.getTab());
 					// Run the sub function for that menu
+					mainMenu.runSubMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab()));
+					// Close the tab
+					mainMenu.closeTab(mainMenu.getTab());
 				}else{
 					mainMenu.openTab(mainMenu.getTab());
 				}
@@ -168,9 +184,7 @@ void CUEditor::run(){
 				}
 			}
 		}
-		if(key == CU::keyCode::k_space){
-			running = false;
-		}
+
 		// Handle the user breaking the program
 		switch((CUBreakType)videoDriver.halted()){
 			case CUBreakType::SAVE_EXIT:
