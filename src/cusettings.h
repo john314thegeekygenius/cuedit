@@ -36,6 +36,8 @@ typedef struct CUSettings {
 	CU::Color sub_menu_bg_color;
 	CU::Color sub_menu_fg_color;
 
+	CU::Color editor_bg_color;
+	CU::Color editor_fg_color;
 
 	// Application settings
 	// -----------------

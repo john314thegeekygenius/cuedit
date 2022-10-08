@@ -27,12 +27,21 @@ private:
 	CU::Driver videoDriver;
 	CUSettings settings;
 	bool running = false;
-	bool MainMenuTabsSelected = false;
 	
 	std::vector<CUMenu> menuList;
 	std::vector<CU::File> fileList;
+	int fileSelected = 0;
+	std::vector<std::string> clipboard;
+	std::string selected;
 
 	CU::Project project;
+
+public:
+	bool MainMenuTabsSelected = false;
+	bool EditorSelected = false;
+	bool TerminalSelected = false;
+	bool EditorOpen = false;
+	bool TerminalOpen = false;
 
 public:
 	void init();
@@ -42,7 +51,11 @@ public:
 	void close();
 	void handleInt();
 	void drawGUI();
+	void doEditor();
+	void drawEditor();
 	void shutdown();
+
+	void createFile();
 
 	std::string openFile();
 	void ErrorMsgBox(std::string error);

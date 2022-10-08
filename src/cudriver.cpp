@@ -330,6 +330,19 @@ void CU::Driver::drawBar(int x,int y,int w,int h, int floodchar, CU::Color fg, C
 	}
 };
 
+void CU::Driver::drawPattern(int x,int y,int w,int h, std::string floodstring, CU::Color fg, CU::Color bg){
+	CU::Clamp(x,y,w,h,0,0,scrWidth,scrHeight);
+	int patternMod = 0;
+	for(int i = y; i < y+h; i++){
+		for(int e = x; e < x+w; e++){
+			scrBuffer[(i*scrWidth) + e] = (int)floodstring[patternMod];	
+			scrBuffer[scrSize+(i*scrWidth) + e] = (((int)fg)<<8) | (int)bg;
+			patternMod += 1;
+			patternMod %= floodstring.length();
+		}
+	}
+};
+
 void CU::Driver::writeStr(std::string s, int x,int y){
 	if(y < 0) { return; }
 	if(y >= scrHeight) { return; }
@@ -419,6 +432,37 @@ void CU::Driver::writeStrW(std::string s, int x,int y, int w, Color fg, Color bg
 	writeStr(short_str,x,y,fg,bg);
 };
 
+void CU::Driver::writeStrCWR(std::string s, int x,int y, int w){
+	std::string short_str = "";
+	int ext_pos = s.length();
+	for(int i = s.length()-1; i >= 0; i--){
+		if(s.at(i)=='.'){
+			ext_pos = i;
+			break;
+		}
+	}
+
+	for(int i = ext_pos-(w-4); i < ext_pos; i++){
+		if(s.at(i)=='.'){
+			break;
+		} 
+		if(i >= w){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+
+	for(int i = ext_pos; i < s.length(); i++){
+		if(i >= ext_pos+4){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	
+	writeStr(short_str,x+(w>>1)-(short_str.length()>>1),y);
+};
 
 void CU::Driver::kbNoDelay(){
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed

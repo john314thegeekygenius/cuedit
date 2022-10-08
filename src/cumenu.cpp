@@ -148,9 +148,12 @@ void CUMenu::drawSub(CU::Driver &videoDriver, int x, int y, CUMenu_t &tab, int s
 	}
 };
 
-void CUMenu::draw(CU::Driver &videoDriver){
-	// Draw the background
-	videoDriver.drawBar(menuX,menuY,menuWidth,menuHeight, ' ', settings.menu_fg_color, settings.menu_bg_color);
+void CUMenu::draw(CU::Driver &videoDriver, int bg_render){
+	if(bg_render){
+		// Draw the background
+		videoDriver.drawPattern(menuX,menuY,menuWidth,menuHeight, settings.background_pattern, settings.menu_fg_color, settings.menu_bg_color);
+	}
+
 	// Draw a feild
 	videoDriver.drawBox(menuX,menuY,menuWidth,menuHeight, CU::BlockType::SINGLE, settings.menu_fg_color, settings.menu_bg_color);
 	// Draw a title bar

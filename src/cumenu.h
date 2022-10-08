@@ -63,6 +63,6 @@ public:
 
 	void drawSub(CU::Driver &videoDriver, int x, int y, CUMenu_t &tab, int subselect);
 	void drawTab(CU::Driver &videoDriver, std::string name, int x,int y, bool selected);
-	void draw(CU::Driver &videoDriver);
+	void draw(CU::Driver &videoDriver, int bg_render = 1);
 };
 

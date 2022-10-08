@@ -32,10 +32,26 @@ int main(int argc, char *argv[]){
 CUMenu mainMenu;
 
 int MMS_FOpen(){
-	CU::debugWrite(editor.openFile());
+	std::string path = editor.openFile();
+	if(path.length()){
+		// We want to edit the file now
+		editor.EditorSelected = true;
+		editor.EditorOpen = true;
+	}else{
+		// Fail to open
+		// TODO:
+		// Display a message here?
+	}
 	return 0;
 };
 
+int MMS_FNew(){
+	editor.createFile();
+	// We want to edit the file now
+	editor.EditorSelected = true;
+	editor.EditorOpen = true;
+	return 0;
+};
 int MMS_POpen(){
 	return 0;
 };
@@ -47,6 +63,7 @@ int MMS_FExit(){
 };
 
 std::vector<CUSubMenu_t> MM_LFile = {
+	{"New", &MMS_FNew}, 
 	{"Open", &MMS_FOpen}, 
 	{"Save", &CUMenuFNULL}, 
 	{"Save As", &CUMenuFNULL}, 
@@ -84,8 +101,17 @@ std::vector<CUSubMenu_t> MM_LProject = {
 	{"Settings", &CUMenuFNULL}, 
 };
 
+std::vector<CUSubMenu_t> MM_LHelp = {
+	{"About", &CUMenuFNULL}, 
+	{"Help", &CUMenuFNULL}, 
+};
+
 CUMenu_t MM_Sub_Project = {
 	"Project", MM_LProject
+};
+
+CUMenu_t MM_Sub_Help = {
+	"Help", MM_LHelp
 };
 
 
@@ -96,7 +122,19 @@ void CUEditor::init(){
 	videoDriver.setupHandle(&breakHandle);
 	videoDriver.setFPS(30);
 
+	MainMenuTabsSelected = false;
+	EditorSelected = false;
+	TerminalSelected = false;
+
+	EditorOpen = false;
+	TerminalOpen = false;
+
+	clipboard.clear();
+
 	loadSettings();
+
+	fileSelected = 0;
+	fileList.clear(); // Remove any files open
 	
 	menuList.clear(); // Remove any windows
 	
@@ -109,6 +147,8 @@ void CUEditor::init(){
 	mainMenu.addTab(MM_Sub_Edit);
 	mainMenu.addTab(MM_Sub_Settings);
 	mainMenu.addTab(MM_Sub_Project);
+	mainMenu.addTab(MM_Sub_Help);
+	
 };
 
 void CUEditor::close(){
@@ -135,32 +175,27 @@ void CUEditor::run(){
 				mainMenu.selectTab(-1);
 			}
 		}
-		if(key == CU::keyCode::s_left){
-			if(MainMenuTabsSelected){
+
+		if(MainMenuTabsSelected){
+			if(key == CU::keyCode::s_left){
 				mainMenu.closeTab(mainMenu.getTab());
 				int cur = mainMenu.getTab() - 1;
 				if(cur < 0) { cur = 0; }
 				mainMenu.selectTab(cur);
 			}
-		}
-		if(key == CU::keyCode::s_right){
-			if(MainMenuTabsSelected){
+			if(key == CU::keyCode::s_right){
 				mainMenu.closeTab(mainMenu.getTab());
 				int cur = mainMenu.getTab() + 1;
 				if(cur >= mainMenu.numTabs()) { cur = mainMenu.numTabs()-1; }
 				mainMenu.selectTab(cur);
 			}
-		}
-		if(key == CU::keyCode::k_tab){
-			if(MainMenuTabsSelected){
+			if(key == CU::keyCode::k_tab){
 				mainMenu.closeTab(mainMenu.getTab());
 				int cur = mainMenu.getTab() + 1;
 				if(cur >= mainMenu.numTabs()) { cur = 0; }
 				mainMenu.selectTab(cur);
 			}
-		}
-		if(key == CU::keyCode::k_enter){
-			if(MainMenuTabsSelected){
+			if(key == CU::keyCode::k_enter){
 				if(mainMenu.tabOpen(mainMenu.getTab())){
 					// Run the sub function for that menu
 					mainMenu.runSubMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab()));
@@ -173,24 +208,24 @@ void CUEditor::run(){
 					mainMenu.openTab(mainMenu.getTab());
 				}
 			}
-		}
-		if(key == CU::keyCode::s_up){
-			if(MainMenuTabsSelected){
+			if(key == CU::keyCode::s_up){
 				if(mainMenu.tabOpen(mainMenu.getTab())){
 					mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())-1);
 				}
 			}
-		}
-		if(key == CU::keyCode::s_down){
-			if(MainMenuTabsSelected){
+			if(key == CU::keyCode::s_down){
 				if(mainMenu.tabOpen(mainMenu.getTab())){
 					mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())+1);
 				}
 			}
+		}else{
+			if(EditorSelected){
+				doEditor();
+			}else if(TerminalSelected){
+				// TODO:
+				// Add terminal
+			}
 		}
-
-		// Handle the user breaking the program
-		handleInt();
 
 		videoDriver.clearHalt();
 
@@ -199,25 +234,6 @@ void CUEditor::run(){
 
 	}
 
-};
-
-void CUEditor::handleInt(){
-	switch((CUBreakType)videoDriver.halted()){
-		case CUBreakType::SAVE_EXIT:
-			// TODO:
-			// Save the project
-			running = false;
-		break;
-		case CUBreakType::COPY:
-			// TODO:
-			// Copy selected text to clipboard
-			break;
-		case CUBreakType::UNDO:
-			// TODO:
-			// Undo changes until the buffer is empty
-			break;
-	}
-	
 };
 
 void CUEditor::shutdown(){
@@ -270,8 +286,13 @@ void CUEditor::drawGUI(){
 	// Center the time
 	videoDriver.writeStr(datestr, (videoDriver.getWidth() - datestr.length()) ,0);
 
+	// Draw the editor
+	if(EditorOpen){
+		drawEditor();
+	}
+
 	// Draw the menus
-	mainMenu.draw(videoDriver);
+	mainMenu.draw(videoDriver,0);
 
 };
 
@@ -628,13 +649,14 @@ std::string CUEditor::openFile(){
 		if(key == CU::keyCode::k_enter){
 			// If it's a directory, enter it
 			if(folderContents[fileSelected].is_directory()){
-				CU::debugWrite("Entering:"+std::string(folderContents[fileSelected].path()));
+//				CU::debugWrite("Entering:"+std::string(folderContents[fileSelected].path()));
 				loadDirectory(std::string(folderContents[fileSelected].path()));
 			}else{
 				// Open the file if we can
 				dialogOpen = false;
-				// TODO:
-				// Open the file
+				fileList.emplace_back(CU::File());
+				fileList.back().open(folderContents[fileSelected].path());
+				fpath = folderContents[fileSelected].path();
 			}
 		}
 
@@ -681,5 +703,68 @@ void CUEditor::ErrorMsgBox(std::string error){
 		videoDriver.flush();
 		//videoDriver.updateDriver();
 	}
+};
+
+void CUEditor::createFile(){
+	fileList.emplace_back(CU::File());
+	fileList.back().open("");
+};
+
+void CUEditor::doEditor(){
+
+	// Handle interupts
+	handleInt();
+};
+
+void CUEditor::drawEditor(){
+	int winX = 1;
+	int winY = 2;
+	int winWidth = videoDriver.getWidth()-2;
+	int winHeight = videoDriver.getHeight()-3;
+
+	// Draw the background
+	videoDriver.drawBar(winX,winY,winWidth,winHeight, ' ', settings.editor_fg_color, settings.editor_bg_color);
+	// Draw a field
+	videoDriver.drawBox(winX,winY,winWidth,winHeight, CU::BlockType::SINGLE, settings.editor_fg_color, settings.editor_bg_color);
+	// Draw a title bar
+	videoDriver.drawBar(winX,winY,winWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
+
+	for(int e = 0; e < fileList.size(); e++){
+		bool usePath = false;
+		char LBChar = (e==fileSelected)?'<':'[';
+		char RBChar = (e==fileSelected)?'>':']';
+		for(int i = 0; i < fileList.size();  i ++){
+			if(e == i) continue;
+			if(fileList[e].getName() == fileList[i].getName()){
+				usePath = true;
+				break;
+			}
+		}
+		if(usePath){
+//			videoDriver.writeStrCWR(LBChar+fileList[fileSelected].getPath()+RBChar, winX + (e * 16), winY, 16);
+		}else{
+//			videoDriver.writeStrCWR(LBChar+fileList[fileSelected].getName()+RBChar, winX + (e * 16), winY, 16);
+		}
+	}
+
+};
+
+void CUEditor::handleInt(){
+	switch((CUBreakType)videoDriver.halted()){
+		case CUBreakType::SAVE_EXIT:
+			// TODO:
+			// Save the project
+			running = false;
+		break;
+		case CUBreakType::COPY:
+			// TODO:
+			// Copy selected text to clipboard
+			break;
+		case CUBreakType::UNDO:
+			// TODO:
+			// Undo changes until the buffer is empty
+			break;
+	}
+	
 };
 

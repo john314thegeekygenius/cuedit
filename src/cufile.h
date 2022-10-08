@@ -32,18 +32,17 @@ private:
     std::string name;// Name of the file
     std::string path;// Where the file is located
     FileMode mode;   // What mode is the file opened in
-    int chunk;       // For opening the file in chunks
     bool fileLoaded; // Is the file fully read
 
-	std::vector<std::string> clipboard;
 	std::vector<std::string> history;
-	std::vector<std::string> data;
+	std::string data;
 public:
-    File();
-    ~File();
-    ErrorCode open(std::string name);
-    ErrorCode openChunks(std::string name);
-    ErrorCode save(std::string name);
+    ErrorCode open(std::string path, FileMode mode = FileMode::READ_ONLY);
+    ErrorCode save(std::string path);
+    void getData(std::string & data_in);
+    std::string getName();
+    std::string getPath();
+
 };
 
 };
