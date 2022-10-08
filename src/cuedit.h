@@ -8,6 +8,19 @@
 */
 #pragma once
 
+namespace CU {
+
+enum class EXEFileTypes {
+	Broken = -2,
+	Unknown = -1,
+	Directory = 0,
+	Symbolic = 1,
+	Normal = 2,
+	EXE = 3,
+	ELF = 4,
+};
+
+};
 
 class CUEditor {
 private:
@@ -32,6 +45,7 @@ public:
 	void shutdown();
 
 	std::string openFile();
+	void ErrorMsgBox(std::string error);
 
 };
 

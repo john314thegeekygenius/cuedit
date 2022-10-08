@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>

@@ -331,23 +331,31 @@ void CU::Driver::drawBar(int x,int y,int w,int h, int floodchar, CU::Color fg, C
 };
 
 void CU::Driver::writeStr(std::string s, int x,int y){
+	if(y < 0) { return; }
+	if(y >= scrHeight) { return; }
 	y *= scrWidth;
 	for(char c : s){
+		if(x < 0) { continue; }
 		scrBuffer[(y) + x] = (int)c;
 		x++;
-		// TODO:
-		// Fix overflow????
+		if(x > scrWidth){
+			return;
+		}
 	}
 };
 
 void CU::Driver::writeStr(std::string s, int x,int y, CU::Color fg, CU::Color bg){
+	if(y < 0) { return; }
+	if(y >= scrHeight) { return; }
 	y *= scrWidth;
 	for(char c : s){
+		if(x < 0) { continue; }
 		scrBuffer[(y) + x] = (int)c;
 		scrBuffer[scrSize+(y) + x] = (((int)fg)<<8) | (int)bg;
 		x++;
-		// TODO:
-		// Fix overflow????
+		if(x > scrWidth){
+			return;
+		}
 	}
 };
 

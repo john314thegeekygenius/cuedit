@@ -166,6 +166,9 @@ void CUEditor::run(){
 					mainMenu.runSubMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab()));
 					// Close the tab
 					mainMenu.closeTab(mainMenu.getTab());
+					// We don't want to still be on the main menu tabs
+					MainMenuTabsSelected = false;
+					mainMenu.selectTab(-1);
 				}else{
 					mainMenu.openTab(mainMenu.getTab());
 				}
@@ -378,6 +381,7 @@ std::string CUEditor::openFile(){
 	std::vector<std::filesystem::directory_entry> folderContents;
 	std::vector<std::string> folderContentNames;
 	std::vector<std::pair<std::string, std::string>> folderFileTimes;
+	std::vector<CU::EXEFileTypes> folderFileTypes;
 	std::filesystem::path folderPath = std::filesystem::current_path();
 	std::filesystem::path originalPath = std::filesystem::current_path();
 
@@ -387,12 +391,7 @@ std::string CUEditor::openFile(){
 
 	std::string parentPath = "";
 
-	// TODO:
-	// Add error catching for filesystem
-	// std::error_code ec;
-	//
-	// Add permision showing https://en.cppreference.com/w/cpp/filesystem/permissions
-	//
+	std::error_code filesystemErrorCode;
 
 	auto addTime = [&](std::filesystem::file_time_type ftime) { 
 		std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(ftime));
@@ -416,16 +415,24 @@ std::string CUEditor::openFile(){
 	};
 
 	auto loadDirectory = [&](std::string c_path) {
+		filesystemErrorCode.clear();
 		if(c_path.length()){
 			if(c_path.compare(".") == 0){
-				std::filesystem::current_path(std::filesystem::path("/.")); //set the path
+				std::filesystem::current_path(std::filesystem::path("/."),filesystemErrorCode); //set the path
 			}else{
-				std::filesystem::current_path(std::filesystem::path(c_path)); //set the path
+				std::filesystem::current_path(std::filesystem::path(c_path),filesystemErrorCode); //set the path
 			}
 		}else{
-			std::filesystem::current_path(originalPath); //set the path
+			std::filesystem::current_path(originalPath,filesystemErrorCode); //set the path
 		}
 
+		// TODO:
+		// Add error handleing
+		if(filesystemErrorCode.value()){
+			ErrorMsgBox(filesystemErrorCode.message());
+//			CU::debugWrite(filesystemErrorCode.message(),CU::DebugMsgType::ERROR);
+		}
+		
 		// Reset the folder path
 		folderPath = std::filesystem::current_path();
 		// Reset to 0
@@ -436,45 +443,76 @@ std::string CUEditor::openFile(){
 		folderContents.clear();
 		folderContentNames.clear();
 		folderFileTimes.clear();
+		folderFileTypes.clear();
 
 		if(parentPath.length()){
 			std::filesystem::file_time_type ftime;
-			std::error_code ec;
 			// Add a back options
-
-			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path(".")));
+			filesystemErrorCode.clear();
+			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path("."),filesystemErrorCode));
 			folderContentNames.push_back(".");
-			ftime = folderContents.back().last_write_time(ec);
-			if(ec.value()){
-				addFakeTime();
-			}else{
-				addTime(ftime);
-			}
-			ec.clear();
+			folderFileTypes.push_back(CU::EXEFileTypes::Directory); // It's a directory
 
-			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path("..")));
-			folderContentNames.push_back("..");
-			ftime = folderContents.back().last_write_time(ec);
-			if(ec.value()){
+			filesystemErrorCode.clear();
+			ftime = folderContents.back().last_write_time(filesystemErrorCode);
+			if(filesystemErrorCode.value()){
 				addFakeTime();
 			}else{
 				addTime(ftime);
 			}
-			ec.clear();
+			filesystemErrorCode.clear();
+			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path(".."),filesystemErrorCode));
+			folderContentNames.push_back("..");
+			folderFileTypes.push_back(CU::EXEFileTypes::Directory); // It's a directory
+
+			filesystemErrorCode.clear();
+			ftime = folderContents.back().last_write_time(filesystemErrorCode);
+			if(filesystemErrorCode.value()){
+				addFakeTime();
+			}else{
+				addTime(ftime);
+			}
+			filesystemErrorCode.clear();
 		}
 
 		for (const auto & entry : std::filesystem::directory_iterator(folderPath)){
 			folderContents.push_back(entry);
 			folderContentNames.push_back(entry.path().filename());
 			
-			std::error_code ec;
-			std::filesystem::file_time_type ftime = entry.last_write_time(ec);
-			if(ec.value()){
+			filesystemErrorCode.clear();
+			std::filesystem::file_time_type ftime = entry.last_write_time(filesystemErrorCode);
+			if(filesystemErrorCode.value()){
 				addFakeTime();
 			}else{
 				addTime(ftime);
 			}
-			ec.clear();
+			filesystemErrorCode.clear();
+			if(entry.is_directory()){
+				folderFileTypes.push_back(CU::EXEFileTypes::Directory); // It's a directory
+			}else if(entry.is_symlink()){
+				folderFileTypes.push_back(CU::EXEFileTypes::Symbolic); // Symbolic Link
+			}else if(entry.is_regular_file()){
+				// Open the file and read the header
+				char headerBuffer[128];
+				FILE *fp = fopen(entry.path().c_str(),"rb");
+				if(fp!=NULL){
+					fread(&headerBuffer,128,1,fp);
+					fclose(fp); fp = NULL;
+					// Check the first two bytes
+					if(headerBuffer[0] == 'M' && headerBuffer[1] == 'Z'){
+						folderFileTypes.push_back(CU::EXEFileTypes::EXE); // Windows Executable
+					}else if(headerBuffer[0] == 0x7f && headerBuffer[1] == 0x45 && 
+							headerBuffer[2] == 0x4c && headerBuffer[3] == 0x46){
+						folderFileTypes.push_back(CU::EXEFileTypes::ELF); // ELF Executable
+					}else{
+						folderFileTypes.push_back(CU::EXEFileTypes::Normal); // Normal file
+					}
+				}else{
+					folderFileTypes.push_back(CU::EXEFileTypes::Broken); // Error opening
+				}
+			}else{
+				folderFileTypes.push_back(CU::EXEFileTypes::Unknown); // Unknown				
+			}
 			//CU::debugWrite(std::string(entry.path().filename())+"   "+timeString);
 		}
 	};
@@ -507,9 +545,24 @@ std::string CUEditor::openFile(){
 				break;
 			}
 			videoDriver.writeStrW(folderContentNames[fileOffset], menuX + 2, menuY+i+1, 8);
-			if(folderContents[i].is_directory()){
+			// Test if it's a directory
+			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::Directory){
 				videoDriver.writeStr("<DIR>", menuX + menuWidth-18, menuY+i+1);
+			}else
+			// Check if it's an executable
+			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::EXE){
+				videoDriver.writeStr("[EXE]", menuX + menuWidth-18, menuY+i+1);
+			}else
+			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::ELF){
+				videoDriver.writeStr("[ELF]", menuX + menuWidth-18, menuY+i+1);
+			}else
+			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::Symbolic){
+				videoDriver.writeStr("<SYM>", menuX + menuWidth-18, menuY+i+1);
+			}else
+			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::Broken){
+				videoDriver.writeStr("[???]", menuX + menuWidth-18, menuY+i+1);
 			}
+			
 			videoDriver.writeStr(folderFileTimes[fileOffset].second, menuX + menuWidth-4-(folderFileTimes[fileOffset].second.length()), menuY+i+1);
 			
 			if(fileSelected == fileOffset){
@@ -537,6 +590,20 @@ std::string CUEditor::openFile(){
 		// Write some text
 		videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
 
+		std::string permissionString = "";
+		std::filesystem::file_status file_status = status(folderContents[fileSelected].path());
+		if( (file_status.permissions() & std::filesystem::perms::group_read) != std::filesystem::perms::none){
+			permissionString += "Read ";
+		}
+		if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
+			permissionString += "Write ";
+		}
+		if( (file_status.permissions() & std::filesystem::perms::group_exec) != std::filesystem::perms::none){
+			permissionString += "Execute";
+		}
+
+		videoDriver.writeStrW("Permisions: "+permissionString, menuX + 1, menuY + menuHeight-3,30);
+
 		videoDriver.writeStr("Last modified:"+folderFileTimes[fileSelected].first+" "+folderFileTimes[fileSelected].second, menuX + 1, menuY + menuHeight-2);
 
 		CU::keyCode key = videoDriver.getkey();
@@ -544,7 +611,8 @@ std::string CUEditor::openFile(){
 		if(key == CU::keyCode::k_escape){
 			dialogOpen = false;
 			// Reset the directory
-			std::filesystem::current_path(originalPath); //set the path
+			filesystemErrorCode.clear();
+			std::filesystem::current_path(originalPath,filesystemErrorCode); //set the path
 		}
 		if(key == CU::keyCode::k_tab){
 		}
@@ -580,3 +648,38 @@ std::string CUEditor::openFile(){
 	}
 	return fpath;
 };
+
+void CUEditor::ErrorMsgBox(std::string error){
+	int menuWidth = 32;
+	int menuHeight = 8;
+	int menuX = (videoDriver.getWidth()>>1) - (menuWidth>>1);
+	int menuY = (videoDriver.getHeight()>>1) - (menuHeight>>1)+1;
+
+	bool userAck = false;
+	while(!userAck){
+
+		CU::keyCode key = videoDriver.getkey();
+
+		if(key == CU::keyCode::k_escape || key == CU::keyCode::k_return){
+			userAck = true;
+		}
+
+		// Draw a window
+
+		// Draw the background
+		videoDriver.drawBar(menuX,menuY,menuWidth,menuHeight, ' ', settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a feild
+		videoDriver.drawBox(menuX,menuY,menuWidth,menuHeight, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a title bar
+		videoDriver.drawBar(menuX,menuY,menuWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
+		videoDriver.writeStr("Error!", menuX + (menuWidth>>1)-5, menuY);
+
+		videoDriver.writeStr(error, menuX + (menuWidth>>1)-(error.length()>>1), menuY+(menuHeight>>1));
+
+		videoDriver.clearHalt();
+
+		videoDriver.flush();
+		//videoDriver.updateDriver();
+	}
+};
+
