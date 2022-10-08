@@ -32,6 +32,7 @@ int main(int argc, char *argv[]){
 CUMenu mainMenu;
 
 int MMS_FOpen(){
+	CU::debugWrite(editor.openFile());
 	return 0;
 };
 
@@ -186,21 +187,7 @@ void CUEditor::run(){
 		}
 
 		// Handle the user breaking the program
-		switch((CUBreakType)videoDriver.halted()){
-			case CUBreakType::SAVE_EXIT:
-				// TODO:
-				// Save the project
-				running = false;
-			break;
-			case CUBreakType::COPY:
-				// TODO:
-				// Copy selected text to clipboard
-				break;
-			case CUBreakType::UNDO:
-				// TODO:
-				// Undo changes until the buffer is empty
-				break;
-		}
+		handleInt();
 
 		videoDriver.clearHalt();
 
@@ -209,6 +196,25 @@ void CUEditor::run(){
 
 	}
 
+};
+
+void CUEditor::handleInt(){
+	switch((CUBreakType)videoDriver.halted()){
+		case CUBreakType::SAVE_EXIT:
+			// TODO:
+			// Save the project
+			running = false;
+		break;
+		case CUBreakType::COPY:
+			// TODO:
+			// Copy selected text to clipboard
+			break;
+		case CUBreakType::UNDO:
+			// TODO:
+			// Undo changes until the buffer is empty
+			break;
+	}
+	
 };
 
 void CUEditor::shutdown(){
@@ -347,8 +353,230 @@ void CUEditor::loadSettings(){
 			else if(s_tag.compare("MENU-FG-COLOR")==0){
 				settings.menu_fg_color = (CU::Color)s_value;
 			}
+			else if(s_tag.compare("SUB-MENU-BG-COLOR")==0){
+				settings.sub_menu_bg_color = (CU::Color)s_value;
+			}
+			else if(s_tag.compare("SUB-MENU-FG-COLOR")==0){
+				settings.sub_menu_fg_color = (CU::Color)s_value;
+			}
 		}
 	}
 	 	
 };
 
+std::string CUEditor::openFile(){
+	bool dialogOpen = true;
+	int menuWidth = 48;
+	int menuHeight = 16;
+	int menuX = (videoDriver.getWidth()>>1) - (menuWidth>>1);
+	int menuY = (videoDriver.getHeight()>>1) - (menuHeight>>1)+1;
+	int contentHeight = menuHeight - 5;
+
+	std::string fpath = "";
+	std::string lastModifiedString = "";
+
+	std::vector<std::filesystem::directory_entry> folderContents;
+	std::vector<std::string> folderContentNames;
+	std::vector<std::pair<std::string, std::string>> folderFileTimes;
+	std::filesystem::path folderPath = std::filesystem::current_path();
+	std::filesystem::path originalPath = std::filesystem::current_path();
+
+	bool openFileBool = true;
+	int fileSelected = 0;
+	int fileScroll = 0;
+
+	std::string parentPath = "";
+
+	// TODO:
+	// Add error catching for filesystem
+	// std::error_code ec;
+	//
+	// Add permision showing https://en.cppreference.com/w/cpp/filesystem/permissions
+	//
+
+	auto addTime = [&](std::filesystem::file_time_type ftime) { 
+		std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(ftime));
+		std::tm *tstruct = localtime(&cftime);
+
+		std::string dateString = "";
+		dateString += std::to_string(tstruct->tm_mon+1)+"/";
+		dateString += std::to_string(tstruct->tm_mday)+"/";
+		dateString += std::to_string(tstruct->tm_year+1900);
+
+		std::string timeString = "";
+		timeString += std::to_string(tstruct->tm_hour)+":";
+		timeString += std::to_string(tstruct->tm_min)+":";
+		timeString += std::to_string(tstruct->tm_sec);
+
+		folderFileTimes.push_back({dateString, timeString});
+	};
+
+	auto addFakeTime = [&](){
+		folderFileTimes.push_back({"1/1/1900", "0:0:0"});
+	};
+
+	auto loadDirectory = [&](std::string c_path) {
+		if(c_path.length()){
+			if(c_path.compare(".") == 0){
+				std::filesystem::current_path(std::filesystem::path("/.")); //set the path
+			}else{
+				std::filesystem::current_path(std::filesystem::path(c_path)); //set the path
+			}
+		}else{
+			std::filesystem::current_path(originalPath); //set the path
+		}
+
+		// Reset the folder path
+		folderPath = std::filesystem::current_path();
+		// Reset to 0
+		fileSelected = 0;
+		// Grab the parent path
+		parentPath = folderPath.parent_path(); 
+		// Remove any old path files
+		folderContents.clear();
+		folderContentNames.clear();
+		folderFileTimes.clear();
+
+		if(parentPath.length()){
+			std::filesystem::file_time_type ftime;
+			std::error_code ec;
+			// Add a back options
+
+			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path(".")));
+			folderContentNames.push_back(".");
+			ftime = folderContents.back().last_write_time(ec);
+			if(ec.value()){
+				addFakeTime();
+			}else{
+				addTime(ftime);
+			}
+			ec.clear();
+
+			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path("..")));
+			folderContentNames.push_back("..");
+			ftime = folderContents.back().last_write_time(ec);
+			if(ec.value()){
+				addFakeTime();
+			}else{
+				addTime(ftime);
+			}
+			ec.clear();
+		}
+
+		for (const auto & entry : std::filesystem::directory_iterator(folderPath)){
+			folderContents.push_back(entry);
+			folderContentNames.push_back(entry.path().filename());
+			
+			std::error_code ec;
+			std::filesystem::file_time_type ftime = entry.last_write_time(ec);
+			if(ec.value()){
+				addFakeTime();
+			}else{
+				addTime(ftime);
+			}
+			ec.clear();
+			//CU::debugWrite(std::string(entry.path().filename())+"   "+timeString);
+		}
+	};
+
+	loadDirectory("");
+
+	while(dialogOpen){
+		// Draw the window
+
+		// Draw the background
+		videoDriver.drawBar(menuX,menuY,menuWidth,menuHeight, ' ', settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a feild
+		videoDriver.drawBox(menuX,menuY,menuWidth,menuHeight, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		videoDriver.drawSubBox(menuX,menuY+contentHeight,menuWidth, 5, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a title bar
+		videoDriver.drawBar(menuX,menuY,menuWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
+		videoDriver.writeStr("Open File", menuX + (menuWidth>>1)-5, menuY);
+
+		// Write all the files
+		for(int i = 0; i < contentHeight-1; i++){
+			int fileOffset = i + fileScroll; //std::max(fileSelected-(contentHeight-1),0);
+			if(fileSelected-fileScroll < 0){
+				fileScroll -= 1;
+			}
+			if(fileSelected-fileScroll >= contentHeight-1){
+				fileScroll += 1;
+			}
+
+			if(fileOffset >= folderContentNames.size()){
+				break;
+			}
+			videoDriver.writeStrW(folderContentNames[fileOffset], menuX + 2, menuY+i+1, 8);
+			if(folderContents[i].is_directory()){
+				videoDriver.writeStr("<DIR>", menuX + menuWidth-18, menuY+i+1);
+			}
+			videoDriver.writeStr(folderFileTimes[fileOffset].second, menuX + menuWidth-4-(folderFileTimes[fileOffset].second.length()), menuY+i+1);
+			
+			if(fileSelected == fileOffset){
+				videoDriver.writeStr("[",menuX+1,menuY+i+1);
+				videoDriver.writeStr("]",menuX+menuWidth-3,menuY+i+1);
+			}
+		}
+
+		// Draw a scroll bar
+		int filescale = std::max((int)folderContents.size()-contentHeight,1);
+		float scrollBarScale = 1.0f / (float)(filescale);
+		int scrollBarHeight = contentHeight*scrollBarScale;
+		if(scrollBarHeight < 1){
+			scrollBarHeight = 1;
+		}
+		for(int i = 0; i < contentHeight-1; i++){
+			if(scrollBarHeight){
+				videoDriver.writeStr("#",menuX+menuWidth-2,menuY+i+1);
+				scrollBarHeight -= 1;
+			}else{
+				videoDriver.writeStr(":",menuX+menuWidth-2,menuY+i+1);
+			}
+		}
+
+		// Write some text
+		videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
+
+		videoDriver.writeStr("Last modified:"+folderFileTimes[fileSelected].first+" "+folderFileTimes[fileSelected].second, menuX + 1, menuY + menuHeight-2);
+
+		CU::keyCode key = videoDriver.getkey();
+
+		if(key == CU::keyCode::k_escape){
+			dialogOpen = false;
+			// Reset the directory
+			std::filesystem::current_path(originalPath); //set the path
+		}
+		if(key == CU::keyCode::k_tab){
+		}
+		if(key == CU::keyCode::s_up){
+			fileSelected -= 1;
+			if(fileSelected < 0){ fileSelected = 0; }
+		}
+		if(key == CU::keyCode::s_down){
+			fileSelected += 1;
+			if(fileSelected >= folderContents.size()) { fileSelected = folderContents.size()-1; }
+		}
+
+		if(key == CU::keyCode::k_enter){
+			// If it's a directory, enter it
+			if(folderContents[fileSelected].is_directory()){
+				CU::debugWrite("Entering:"+std::string(folderContents[fileSelected].path()));
+				loadDirectory(std::string(folderContents[fileSelected].path()));
+			}else{
+				// Open the file if we can
+				dialogOpen = false;
+				// TODO:
+				// Open the file
+			}
+		}
+
+		// Handle the user breaking the program
+		handleInt();
+
+		videoDriver.clearHalt();
+
+		videoDriver.flush();
+		//videoDriver.updateDriver();
+	}
+	return fpath;
+};

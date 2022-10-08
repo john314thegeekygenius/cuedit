@@ -11,10 +11,3 @@
 
 #include "cuheads.h"
 
-CU::File::File(){
-	
-};
-
-CU::File::~File(){
-	
-};

@@ -23,6 +23,8 @@
 #include <ctime>
 #include <csignal>
 #include <chrono>
+#include <filesystem>
+
 
 namespace CU {
 
@@ -163,9 +165,12 @@ public:
 	void flush();
 	void writeBChar(BlockChar c);
 	void drawBox(int x,int y,int w,int h,BlockType t, Color fg = Color::WHITE, Color bg = Color::BLACK);
+	void drawSubBox(int x,int y,int w,int h,BlockType t, Color fg = Color::WHITE, Color bg = Color::BLACK);
 	void drawBar(int x,int y,int w,int h, int floodchar = ' ', Color fg = Color::WHITE, Color bg = Color::BLACK);
 	void writeStr(std::string s, int x,int y);
 	void writeStr(std::string s, int x,int y, Color fg, Color bg);
+	void writeStrW(std::string s, int x,int y, int w);
+	void writeStrW(std::string s, int x,int y, int w, Color fg, Color bg);
 	
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 	void kbNoDelay();

@@ -12,12 +12,12 @@
 
 namespace CU {
 
-typedef enum FileMode {
+enum class FileMode {
     READ_ONLY = 0,
     READ_WRITE = 1,
 };
 
-typedef enum ErrorCode {
+enum class ErrorCode {
     NONE = 0,
     OPEN = 1,
     READ_ONLY = 2,
@@ -30,6 +30,7 @@ class File {
 private:
 
     std::string name;// Name of the file
+    std::string path;// Where the file is located
     FileMode mode;   // What mode is the file opened in
     int chunk;       // For opening the file in chunks
     bool fileLoaded; // Is the file fully read

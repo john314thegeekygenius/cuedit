@@ -287,18 +287,36 @@ void CU::Driver::drawBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, 
 	int offset = (y*scrWidth) + x;
 	if(offset > 0 && offset < scrSize){
 		scrBuffer[offset] = (int)CU::BlockChar::TLCORNER;
+		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 	}
 	offset = (y*scrWidth) + x + w-1;
 	if(offset > 0 && offset < scrSize){
 		scrBuffer[offset] = (int)CU::BlockChar::TRCORNER;
+		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 	}
 	offset = (y*scrWidth) + x + ((h-1)*scrWidth);
 	if(offset > 0 && offset < scrSize){
 		scrBuffer[offset] = (int)CU::BlockChar::BLCORNER;
+		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 	}
 	offset = (y*scrWidth) + x + ((h-1)*scrWidth) + w-1;
 	if(offset > 0 && offset < scrSize){
 		scrBuffer[offset] = (int)CU::BlockChar::BRCORNER;
+		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+	}
+};
+
+void CU::Driver::drawSubBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, CU::Color bg){
+	drawBox(x,y,w,h,t,fg,bg);
+	int offset = (y*scrWidth) + x;
+	if(offset > 0 && offset < scrSize){
+		scrBuffer[offset] = (int)CU::BlockChar::LINTERS;
+		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+	}
+	offset = (y*scrWidth) + x + w-1;
+	if(offset > 0 && offset < scrSize){
+		scrBuffer[offset] = (int)CU::BlockChar::RINTERS;
+		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 	}
 };
 
@@ -332,6 +350,67 @@ void CU::Driver::writeStr(std::string s, int x,int y, CU::Color fg, CU::Color bg
 		// Fix overflow????
 	}
 };
+
+void CU::Driver::writeStrW(std::string s, int x,int y, int w){
+	std::string short_str = "";
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			break;
+		} 
+		if(i >= w){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	int ext_pos = s.length();
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			ext_pos = i;
+			break;
+		}
+	}
+	for(int i = ext_pos; i < s.length(); i++){
+		if(i >= ext_pos+8){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	
+	writeStr(short_str,x,y);
+};
+
+void CU::Driver::writeStrW(std::string s, int x,int y, int w, Color fg, Color bg){
+	std::string short_str = "";
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			break;
+		} 
+		if(i >= w){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	int ext_pos = s.length();
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			ext_pos = i;
+			break;
+		}
+	}
+	for(int i = ext_pos; i < s.length(); i++){
+		if(i >= ext_pos+8){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	
+	writeStr(short_str,x,y,fg,bg);
+};
+
 
 void CU::Driver::kbNoDelay(){
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
@@ -439,8 +518,6 @@ void CU::Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int
 	if(h > maxh) { h = maxh; }
 	if(w < 0) { w = 0; }
 	if(h < 0) { h = 0; }
-	if(x > w) { x = w; }
-	if(y > h) { y = h; }
 };
 
 

@@ -127,9 +127,9 @@ void CUMenu::drawTab(CU::Driver &videoDriver, std::string name, int x,int y, boo
 
 void CUMenu::drawSub(CU::Driver &videoDriver, int x, int y, CUMenu_t &tab, int subselect){
 	// Draw the background
-	videoDriver.drawBar(x,y,tab.subMenuWidth+4,tab.submenu.size()+2, ' ', settings.menu_fg_color, settings.menu_bg_color);
+	videoDriver.drawBar(x,y,tab.subMenuWidth+4,tab.submenu.size()+2, ' ', settings.sub_menu_fg_color, settings.sub_menu_bg_color);
 	// Draw a feild
-	videoDriver.drawBox(x,y,tab.subMenuWidth+4,tab.submenu.size()+2, CU::BlockType::SINGLE, settings.menu_fg_color, settings.menu_bg_color);
+	videoDriver.drawBox(x,y,tab.subMenuWidth+4,tab.submenu.size()+2, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
 
 	for(int i = 0; i < tab.submenu.size(); i++){
 		std::string tabstr = "";
@@ -180,3 +180,4 @@ void CUMenu::draw(CU::Driver &videoDriver){
 	}
 	
 };
+

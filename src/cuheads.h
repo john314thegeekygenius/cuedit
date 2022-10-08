@@ -16,6 +16,10 @@
 
 #include "cudriver.h"
 
+#include "cufile.h"
+
+#include "cuproject.h"
+
 #include "cusettings.h"
 
 #include "cumenu.h"

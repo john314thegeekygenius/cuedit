@@ -33,6 +33,9 @@ typedef struct CUSettings {
 	CU::Color menu_bar_bg_color;
 	CU::Color menu_bar_fg_color;
 
+	CU::Color sub_menu_bg_color;
+	CU::Color sub_menu_fg_color;
+
 
 	// Application settings
 	// -----------------
@@ -44,10 +47,12 @@ typedef struct CUSettings {
 		foreground_color = CU::Color::L_WHITE;
 		head_bg_color = CU::Color::BLACK;
 		head_fg_color = CU::Color::L_WHITE;
-		menu_bg_color = CU::Color::BLACK;
-		menu_fg_color = CU::Color::L_WHITE;
 		menu_bar_bg_color = CU::Color::BLACK;
 		menu_bar_fg_color = CU::Color::L_WHITE;
+		menu_bg_color = CU::Color::BLACK;
+		menu_fg_color = CU::Color::L_WHITE;
+		sub_menu_bg_color = CU::Color::BLACK;
+		sub_menu_fg_color = CU::Color::L_WHITE;
 		handleBreak = CUBreakType::COPY;
 	};
 
@@ -66,6 +71,9 @@ typedef struct CUSettings {
 
 		menu_bg_color = set.menu_bg_color;
 		menu_fg_color = set.menu_fg_color;
+
+		sub_menu_bg_color = set.sub_menu_bg_color;
+		sub_menu_fg_color = set.sub_menu_fg_color;		
 
 		handleBreak = set.handleBreak;
 	};

@@ -17,14 +17,21 @@ private:
 	bool MainMenuTabsSelected = false;
 	
 	std::vector<CUMenu> menuList;
+	std::vector<CU::File> fileList;
+
+	CU::Project project;
+
 public:
 	void init();
 	void loadSettings();
 	void halt(int e);
 	void run();
 	void close();
+	void handleInt();
 	void drawGUI();
 	void shutdown();
+
+	std::string openFile();
 
 };
 
