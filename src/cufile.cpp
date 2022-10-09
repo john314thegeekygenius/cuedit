@@ -58,6 +58,12 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 			return CU::ErrorCode::READ;
 		}
 		data.assign(buffer, buffer+length);
+
+		for( int i = data.size()-1; i >= 0; i--){
+			if(data[i] == 13 && data[i+1] == 10){ 
+				data.erase(data.begin()+i);
+			}
+		}
 		
 		delete[] buffer;
 
@@ -76,6 +82,7 @@ CU::ErrorCode CU::File::openNew(std::string fname, CU::FileMode o_mode){
 	history.clear();
 	// Clear any data
 	data.clear();
+	data.push_back('\n'); // Add a new line
 	fileLoaded = true;
 	return CU::ErrorCode::NONE;
 };

@@ -1,232 +1,56 @@
 INFO:Opened debug file
 INFO:Setup Handler
 INFO:Initalized window at 0,1
+INFO:Raw bytes:1
 INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Key pressed 65
+INFO:Raw bytes:1
 INFO:Raw:10
-INFO:Key pressed 10
+INFO:Raw bytes:3
 INFO:Raw:27
-INFO:Key pressed 27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:1
+INFO:Raw:27
+INFO:Raw bytes:1
+INFO:Raw:27
+INFO:Raw bytes:1
 INFO:Raw:10
-INFO:Key pressed 10
+INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
 INFO:Raw:66
-INFO:Key pressed 66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:1
 INFO:Raw:10
-INFO:Key pressed 10
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:10
-INFO:Key pressed 10
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:54
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:91
-INFO:Key pressed 91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Key pressed 67
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Key pressed 68
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:53
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:91
-INFO:Key pressed 91
-INFO:Raw:54
-INFO:Key pressed 54
-INFO:Raw:126
-INFO:Key pressed 126
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:54
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:91
-INFO:Key pressed 91
-INFO:Raw:54
-INFO:Key pressed 54
-INFO:Raw:126
-INFO:Key pressed 126
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:54
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:91
-INFO:Key pressed 91
-INFO:Raw:54
-INFO:Key pressed 54
-INFO:Raw:126
-INFO:Key pressed 126
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:54
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:91
-INFO:Key pressed 91
-INFO:Raw:54
-INFO:Key pressed 54
-INFO:Raw:126
-INFO:Key pressed 126
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:54
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:91
-INFO:Key pressed 91
-INFO:Raw:54
-INFO:Key pressed 54
-INFO:Raw:126
-INFO:Key pressed 126
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:54
-INFO:Raw:126
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:10
-INFO:Key pressed 10
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:10
-INFO:Key pressed 10
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Key pressed 27
-INFO:Raw:10
-INFO:Key pressed 10
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Key pressed 66
-INFO:Raw:10
-INFO:Key pressed 10
 INFO:Quiting Program

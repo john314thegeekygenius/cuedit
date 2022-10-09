@@ -25,7 +25,7 @@ typedef struct fileInfo {
 	int cursorY = 0;
 	int scrollX = 0;
 	int scrollY = 0;
-
+	int cursorOffset = 0;
 }fileInfo;
 
 };
@@ -63,6 +63,7 @@ public:
 	void close();
 	void handleInt();
 	void drawGUI();
+	void fixCursor();
 	void doEditor(CU::keyCode key);
 	void drawEditor();
 	void shutdown();

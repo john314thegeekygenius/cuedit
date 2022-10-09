@@ -536,6 +536,11 @@ void CU::Driver::kbNoDelay(){
 	struct termios term;
 	tcgetattr(0, &term); // 0 is STDIN
 	term.c_lflag &= ~ICANON;
+	// TODO:
+	// Make this work???
+	// https://stackoverflow.com/questions/40574789/how-to-detect-xoff-and-xon-in-linux-terminal-application
+	term.c_lflag &= ~IXON;
+	
 	tcsetattr(0, TCSANOW, &term); // 0 is STDIN
 	setbuf(stdin, NULL);
 
@@ -544,6 +549,8 @@ void CU::Driver::kbNoDelay(){
 int CU::Driver::kbhit(void) {
     int nbbytes;
     ioctl(0, FIONREAD, &nbbytes);  // 0 is STDIN
+	if(nbbytes)
+		debugWrite("Raw bytes:"+std::to_string(nbbytes));
     return nbbytes;
 };
 
@@ -553,7 +560,19 @@ char CU::Driver::getch() {
 	debugWrite("Raw:"+std::to_string(buf));
 	return (buf);
 };
+/*
+Ctrl + End
+INFO:Raw bytes:6
+INFO:Raw:27
+INFO:Raw:91
 
+INFO:Raw:49 // 0x31
+INFO:Raw:59 // 0x3B
+
+INFO:Raw:53 // Ctrl
+
+INFO:Raw:70
+*/
 CU::keyCode CU::Driver::getkey() {
 	int key = (int)CU::keyCode::k_null;
 	int keyCount = kbhit();
@@ -582,41 +601,45 @@ CU::keyCode CU::Driver::getkey() {
 								if(ch == 53) {
 									key |= (int)CU::keyCode::c_ctrl;
 								}
+								keyCount -= 3;
 							}
 						}
-						if(specialcheck == 0x35){
-							ch = getch();
-							if(ch == 126) {
-								key |= (int)CU::keyCode::s_pg_up;
+						if(keyCount==4){
+							if(specialcheck == 0x35){
+								ch = getch();
+								if(ch == 126) {
+									key |= (int)CU::keyCode::s_pg_up;
+								}
+							}
+							if(specialcheck == 0x36){
+								ch = getch();
+								if(ch == 126) {
+									key |= (int)CU::keyCode::s_pg_down;
+								}
 							}
 						}
-						if(specialcheck == 0x36){
-							ch = getch();
-							if(ch == 126) {
-								key |= (int)CU::keyCode::s_pg_down;
-							}
+					}
+					if(keyCount<=3){
+						ch = getch();
+						// Set to the correct keycode
+						if(ch == 65){
+							key |= (int)CU::keyCode::s_up;
 						}
-
-					}
-					ch = getch();
-					// Set to the correct keycode
-					if(ch == 65){
-						key |= (int)CU::keyCode::s_up;
-					}
-					if(ch == 66){
-						key |= (int)CU::keyCode::s_down;
-					}
-					if(ch == 67){
-						key |= (int)CU::keyCode::s_right;
-					}
-					if(ch == 68){
-						key |= (int)CU::keyCode::s_left;
-					}
-					if(specialcheck == 0x48){
-						key |= (int)CU::keyCode::s_home;
-					}
-					if(specialcheck == 0x46){
-						key |= (int)CU::keyCode::s_end;
+						if(ch == 66){
+							key |= (int)CU::keyCode::s_down;
+						}
+						if(ch == 67){
+							key |= (int)CU::keyCode::s_right;
+						}
+						if(ch == 68){
+							key |= (int)CU::keyCode::s_left;
+						}
+						if(ch == 0x48){
+							key |= (int)CU::keyCode::s_home;
+						}
+						if(ch == 0x46){
+							key |= (int)CU::keyCode::s_end;
+						}
 					}
 				}
 			}else{
@@ -625,7 +648,7 @@ CU::keyCode CU::Driver::getkey() {
 		}else{
 			key = ch;
 		}
-		CU::debugWrite("Key pressed "+std::to_string(ch));
+		//CU::debugWrite("Key pressed "+std::to_string(ch));
 	}
 	return (CU::keyCode)key;
 };

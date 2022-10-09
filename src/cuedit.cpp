@@ -763,24 +763,124 @@ void CUEditor::createFile(){
 	fileTabSelected = fileList.size()-1;
 };
 
-void CUEditor::doEditor(CU::keyCode key){
+void CUEditor::fixCursor(){
 	int winWidth = videoDriver.getWidth()-2;
 	int winHeight = videoDriver.getHeight()-6;
 
-	if(key == CU::keyCode::s_left){
-		fileInfo[fileTabSelected].cursorX -= 1;
-		if(fileInfo[fileTabSelected].cursorX < 0){
+	fileInfo[fileTabSelected].cursorOffset = 0;
+
+	std::vector<char> &filedata = fileList[fileTabSelected].getData();
+
+	// Offset scrollY number of line breaks
+	int lineBreakCount = 0;
+	int fileOffset = filedata.size();
+	bool vertEOF = true;
+	for(int i = 0; i < filedata.size(); i++){
+		if(lineBreakCount == fileInfo[fileTabSelected].cursorY){
+			fileOffset = i;
+			vertEOF = false;
+			break;
+		}
+		if(filedata[i] == 10){ lineBreakCount++; }
+	}
+	
+
+	// Make cursorX stop at end of current line
+	int lineEnd = filedata.size();
+	bool lineEOF = false;
+	for(int i = fileOffset; i < filedata.size(); i++){
+		if(filedata[i] == 10){ 
+			lineEnd = i - fileOffset; 
+			break; 
+		}
+	}
+	if(lineEnd == filedata.size()){
+		lineEnd -= fileOffset;
+		if(lineEnd < 0) { lineEnd = 0; }
+		lineEOF = true;
+	}
+
+	if(fileInfo[fileTabSelected].cursorX > lineEnd){
+		if(lineEOF){
+			fileInfo[fileTabSelected].cursorX = lineEnd;
+		}else{
+			fileInfo[fileTabSelected].cursorX = 0;
+			fileInfo[fileTabSelected].cursorY += 1;
+		}
+	}
+	if(vertEOF){
+		if(fileInfo[fileTabSelected].cursorY>0){
+			fileInfo[fileTabSelected].cursorY = lineBreakCount;
+		}
+	}
+	if(fileInfo[fileTabSelected].cursorX < 0){
+		if(fileInfo[fileTabSelected].cursorY > 0){
+			// Make cursorX stop at end of previous line
+			fileInfo[fileTabSelected].cursorY -= 1;
+
+			// Offset scrollY number of line breaks
+			lineBreakCount = 0;
+			fileOffset = filedata.size();
+			vertEOF = true;
+			for(int i = 0; i < filedata.size(); i++){
+				if(lineBreakCount == fileInfo[fileTabSelected].cursorY){
+					fileOffset = i;
+					vertEOF = false;
+					break;
+				}
+				if(filedata[i] == 10){ lineBreakCount++; }
+			}
+
+			int lineEnd = filedata.size();
+			bool lineEOF = false;
+			for(int i = fileOffset; i < filedata.size(); i++){
+				if(filedata[i] == 10){ 
+					lineEnd = i - fileOffset; 
+					break; 
+				}
+			}
+			if(lineEnd == filedata.size()){
+				lineEnd -= fileOffset;
+				lineEOF = true;
+			}
+
+			fileInfo[fileTabSelected].cursorX = lineEnd;
+		}else{
 			fileInfo[fileTabSelected].cursorX = 0;
 		}
 	}
+/*	if(fileInfo[fileTabSelected].cursorX > 100){
+		fileInfo[fileTabSelected].cursorX = 100;
+	}*/
+	while(fileInfo[fileTabSelected].cursorY < fileInfo[fileTabSelected].scrollY){
+		fileInfo[fileTabSelected].scrollY -= 1;
+		if(fileInfo[fileTabSelected].scrollY < 0){
+			fileInfo[fileTabSelected].scrollY = 0;
+			fileInfo[fileTabSelected].cursorY = 0;
+			break;
+		}
+	}
+	if(fileInfo[fileTabSelected].cursorY < 0){
+		fileInfo[fileTabSelected].cursorY = 0;
+		fileInfo[fileTabSelected].cursorX = 0;
+	}
+
+	while(fileInfo[fileTabSelected].cursorY > (winHeight+fileInfo[fileTabSelected].scrollY)){
+		fileInfo[fileTabSelected].scrollY += 1;
+	}
+
+//	if(fileInfo[fileTabSelected].scrollY > 100){
+//		fileInfo[fileTabSelected].scrollY = 100;
+//	}
+};
+
+void CUEditor::doEditor(CU::keyCode key){
+
+	if(key == CU::keyCode::s_left){
+		fileInfo[fileTabSelected].cursorX -= 1;
+	}
 	if(key == CU::keyCode::s_right){
 		fileInfo[fileTabSelected].cursorX += 1;
-		// TODO:
-		// Make cursorX stop at end of current line
-
-/*		if(fileInfo[fileTabSelected].cursorX > 0){
-			fileInfo[fileTabSelected].cursorX = 0;
-		}*/
 	}
 	if(key == CU::keyCode::s_up){
 		fileInfo[fileTabSelected].cursorY -= 1;
@@ -796,22 +896,19 @@ void CUEditor::doEditor(CU::keyCode key){
 		fileInfo[fileTabSelected].cursorY += 32;
 	}
 
-	while(fileInfo[fileTabSelected].cursorY < fileInfo[fileTabSelected].scrollY){
-		fileInfo[fileTabSelected].scrollY -= 1;
-		if(fileInfo[fileTabSelected].scrollY < 0){
-			fileInfo[fileTabSelected].scrollY = 0;
+	if((int)key & (int)CU::keyCode::c_ctrl){
+		if((int)key & (int)CU::keyCode::s_home){
+			fileInfo[fileTabSelected].cursorY = 0;
+			fileInfo[fileTabSelected].cursorX = 0;
+		}
+		if((int)key & (int)CU::keyCode::s_end){
+			fileInfo[fileTabSelected].cursorY = 999999;
 		}
 	}
-	if(fileInfo[fileTabSelected].cursorY < 0){
-		fileInfo[fileTabSelected].cursorY = 0;
-	}
 
-	while(fileInfo[fileTabSelected].cursorY > (winHeight+fileInfo[fileTabSelected].scrollY)){
-		fileInfo[fileTabSelected].scrollY += 1;
-	}
-//		if(fileInfo[fileTabSelected].scrollY > 100){
-//			fileInfo[fileTabSelected].scrollY = 100;
-//		}
+
+	// Fix the cursor
+	fixCursor();
 
 	// Handle interupts
 	handleInt();
@@ -864,20 +961,30 @@ void CUEditor::drawEditor(){
 	int lineCount = 0;
 	int lineBroke = -1;
 
+	int maxLineNumWidth = 6;
+
 	unsigned int fileOffset = 0;
-	unsigned int eoffound = -1; // (-1 is the largest unsigned int value)
+	int eoffound = -1;
+	int eofdone = 0;
 
 	std::vector<char> &filedata = fileList[fileTabSelected].getData();
 
 	// Offset scrollY number of line breaks
 	int lineBreakCount = 0;
+
+	fileOffset = -1;
 	for(int i = 0; i < filedata.size(); i++){
 		if(lineBreakCount == fileInfo[fileTabSelected].scrollY){
-			fileOffset = i;
-			break;
+			if(fileOffset == -1){
+				fileOffset = i;
+			}
 		}
 		if(filedata[i] == 13){ i++; }
 		if(filedata[i] == 10){ lineBreakCount++; }
+	}
+	if(lineBreakCount <= fileInfo[fileTabSelected].scrollY){
+		// We scrolled too far then
+		fileOffset = filedata.size();
 	}
 	
 
@@ -889,16 +996,18 @@ void CUEditor::drawEditor(){
 				lineBroke = -1;
 			}
 			int i = 0;
-			for(i = 0; i < winWidth-7; i++){
+			for(i = 0; i < winWidth-(maxLineNumWidth+3); i++){
 				if(fileOffset+i >= filedata.size()){
 					eoffound = lineCount;
+					eofdone = 1;
 					break;
 				}
-				if(filedata.at(fileOffset+i) == 13){
-					i++;
-				}
 				if(filedata.at(fileOffset+i) == 10){
-					lineBroke = 2;
+					if(lineBroke == 0)
+						lineBroke = 2;
+					if(lineBroke == 1)
+						lineBroke = 2;
+					eofdone = 0;
 					i++;
 					break;
 				}
@@ -911,7 +1020,7 @@ void CUEditor::drawEditor(){
 			if(lineBroke == 0){
 				lineBroke = 1;
 			}
-			if(i == (winWidth-7)){
+			if(i == winWidth-(maxLineNumWidth+3)){
 				if(lineBroke == -1){
 					lineBroke = 0;
 				}
@@ -919,22 +1028,22 @@ void CUEditor::drawEditor(){
 			fileOffset += i;
 		}
 
-		std::string lineNumStr = CU::to_stringc(lineCount+fileInfo[fileTabSelected].scrollY,'.',4);
-		if(eoffound>=0 && eoffound <= lineCount){
-			lineNumStr = "----";
+		std::string lineNumStr = CU::to_stringc(lineCount+fileInfo[fileTabSelected].scrollY,'.',maxLineNumWidth);
+		if(eofdone || (eoffound >= 0 && eoffound <= lineCount)){
+			lineNumStr = std::string(maxLineNumWidth,'-');
 			lineBroke = -1;
 		}else if(lineBroke>0){
-			lineNumStr = "....";
+			lineNumStr = std::string(maxLineNumWidth,'.');
 		}else{
 			lineCount += 1;
 		}
 		videoDriver.writeStr(lineNumStr,winX+1,winY+1+line_idx,settings.editor_line_fg_color, settings.editor_line_bg_color);
-		videoDriver.writeStr(lineString,winX+6,winY+1+line_idx,settings.editor_line_fg_color, settings.editor_line_bg_color);
-		videoDriver.setCurPos(winX+5,winY+1+line_idx);
+		videoDriver.writeStr(lineString,winX+maxLineNumWidth+2,winY+1+line_idx,settings.editor_line_fg_color, settings.editor_line_bg_color);
+		videoDriver.setCurPos(winX+maxLineNumWidth+1,winY+1+line_idx);
 		videoDriver.writeBChar(CU::BlockChar::DVBAR);
 	}
 	if(cursorBlink){
-		videoDriver.setCurPos(fileInfo[fileTabSelected].cursorX+winX+6-fileInfo[fileTabSelected].scrollX,fileInfo[fileTabSelected].cursorY+winY+1-fileInfo[fileTabSelected].scrollY);
+		videoDriver.setCurPos(fileInfo[fileTabSelected].cursorX+winX+maxLineNumWidth+2-fileInfo[fileTabSelected].scrollX,fileInfo[fileTabSelected].cursorY+winY+1-fileInfo[fileTabSelected].scrollY);
 		videoDriver.writeBChar(CU::BlockChar::VBAR,settings.editor_fg_color, settings.editor_bg_color);
 	}
 };
