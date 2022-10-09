@@ -784,25 +784,34 @@ void CUEditor::doEditor(CU::keyCode key){
 	}
 	if(key == CU::keyCode::s_up){
 		fileInfo[fileTabSelected].cursorY -= 1;
-		if(fileInfo[fileTabSelected].cursorY < fileInfo[fileTabSelected].scrollY){
-			fileInfo[fileTabSelected].scrollY -= 1;
-			if(fileInfo[fileTabSelected].scrollY < 0){
-				fileInfo[fileTabSelected].scrollY = 0;
-			}
-		}
-		if(fileInfo[fileTabSelected].cursorY < 0){
-			fileInfo[fileTabSelected].cursorY = 0;
-		}
 	}
 	if(key == CU::keyCode::s_down){
 		fileInfo[fileTabSelected].cursorY += 1;
-		if(fileInfo[fileTabSelected].cursorY > (winHeight+fileInfo[fileTabSelected].scrollY)){
-			fileInfo[fileTabSelected].scrollY += 1;
+	}
+
+	if(key == CU::keyCode::s_pg_up){
+		fileInfo[fileTabSelected].cursorY -= 32;
+	}
+	if(key == CU::keyCode::s_pg_down){
+		fileInfo[fileTabSelected].cursorY += 32;
+	}
+
+	while(fileInfo[fileTabSelected].cursorY < fileInfo[fileTabSelected].scrollY){
+		fileInfo[fileTabSelected].scrollY -= 1;
+		if(fileInfo[fileTabSelected].scrollY < 0){
+			fileInfo[fileTabSelected].scrollY = 0;
 		}
+	}
+	if(fileInfo[fileTabSelected].cursorY < 0){
+		fileInfo[fileTabSelected].cursorY = 0;
+	}
+
+	while(fileInfo[fileTabSelected].cursorY > (winHeight+fileInfo[fileTabSelected].scrollY)){
+		fileInfo[fileTabSelected].scrollY += 1;
+	}
 //		if(fileInfo[fileTabSelected].scrollY > 100){
 //			fileInfo[fileTabSelected].scrollY = 100;
 //		}
-	}
 
 	// Handle interupts
 	handleInt();
@@ -910,7 +919,7 @@ void CUEditor::drawEditor(){
 			fileOffset += i;
 		}
 
-		std::string lineNumStr = CU::to_stringc(lineCount,'.',4);
+		std::string lineNumStr = CU::to_stringc(lineCount+fileInfo[fileTabSelected].scrollY,'.',4);
 		if(eoffound>=0 && eoffound <= lineCount){
 			lineNumStr = "----";
 			lineBroke = -1;

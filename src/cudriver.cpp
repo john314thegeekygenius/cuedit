@@ -584,6 +584,19 @@ CU::keyCode CU::Driver::getkey() {
 								}
 							}
 						}
+						if(specialcheck == 0x35){
+							ch = getch();
+							if(ch == 126) {
+								key |= (int)CU::keyCode::s_pg_up;
+							}
+						}
+						if(specialcheck == 0x36){
+							ch = getch();
+							if(ch == 126) {
+								key |= (int)CU::keyCode::s_pg_down;
+							}
+						}
+
 					}
 					ch = getch();
 					// Set to the correct keycode
@@ -598,6 +611,12 @@ CU::keyCode CU::Driver::getkey() {
 					}
 					if(ch == 68){
 						key |= (int)CU::keyCode::s_left;
+					}
+					if(specialcheck == 0x48){
+						key |= (int)CU::keyCode::s_home;
+					}
+					if(specialcheck == 0x46){
+						key |= (int)CU::keyCode::s_end;
 					}
 				}
 			}else{

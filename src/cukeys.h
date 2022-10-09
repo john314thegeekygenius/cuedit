@@ -90,9 +90,9 @@ enum class keyCode {
 	k_creturn = 13, // ????
 	k_escape = 27,
 	k_space = 32,
-	k_exclamation = 33, bang = 33,
+	k_exclamation = 33, k_bang = 33,
 	k_str_quote = 34,
-	k_hash = 35, pound = 35,
+	k_hash = 35, k_pound = 35,
 	k_dollar = 36,
 	k_percent = 37,
 	k_and = 38,
@@ -197,6 +197,11 @@ enum class keyCode {
 	s_down = 0x101,
 	s_left = 0x102,
 	s_right = 0x103,
+
+    s_pg_up = 0x104,
+    s_pg_down = 0x105,
+    s_home = 0x106,
+    s_end = 0x107,
 
 	// control masks
 	c_ctrl = 0x200,
