@@ -72,6 +72,13 @@ enum class BlockChar{
 	DBINTERS = 0x8011,
 	DHBAR = 0x8012,
 	DVBAR = 0x8013,
+	// Block Chars
+	SOLID = 0x8020,
+	BOT_HALF = 0x8021,
+	TOP_HALF = 0x8022,
+	LIGHT_SHADE = 0x8023,
+	MID_SHADE = 0x8024,
+	DARK_SHADE = 0x8025,
 };
 
 
@@ -98,6 +105,13 @@ const std::string UNIBlockChars [] = {
 	"\u2569",
 	"\u2550",
 	"\u2551",
+	// Solid Blocks
+	"\u2588",
+	"\u2584",
+	"\u2580",
+	"\u2590",
+	"\u2591",
+	"\u2592",
 };
 
 enum class BlockType {
@@ -165,6 +179,7 @@ public:
 	void clear();
 	void flush();
 	void writeBChar(BlockChar c);
+	void writeBChar(BlockChar c, Color fg, Color bg);
 	void drawBox(int x,int y,int w,int h,BlockType t, Color fg = Color::WHITE, Color bg = Color::BLACK);
 	void drawSubBox(int x,int y,int w,int h,BlockType t, Color fg = Color::WHITE, Color bg = Color::BLACK);
 	void drawBar(int x,int y,int w,int h, int floodchar = ' ', Color fg = Color::WHITE, Color bg = Color::BLACK);
@@ -173,8 +188,6 @@ public:
 	void writeStr(std::string s, int x,int y, Color fg, Color bg);
 	void writeStrW(std::string s, int x,int y, int w);
 	void writeStrW(std::string s, int x,int y, int w, Color fg, Color bg);
-
-	void writeStrCWR(std::string s, int x,int y, int w);
 
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 	void kbNoDelay();
@@ -187,6 +200,12 @@ public:
 int stoi(std::string in_str);
 
 std::string to_string(int value,int fill = 1);
+
+std::string to_stringc(int value,char fillc = '0', int fillw = 1);
+
+std::string trimString(std::string s, int w);
+
+std::string fileizeString(std::string s, int fnw, int exw);
 
 void Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int maxh);
 

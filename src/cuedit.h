@@ -20,6 +20,14 @@ enum class EXEFileTypes {
 	ELF = 4,
 };
 
+typedef struct fileInfo {
+	int cursorX = 0;
+	int cursorY = 0;
+	int scrollX = 0;
+	int scrollY = 0;
+
+}fileInfo;
+
 };
 
 class CUEditor {
@@ -30,9 +38,13 @@ private:
 	
 	std::vector<CUMenu> menuList;
 	std::vector<CU::File> fileList;
-	int fileSelected = 0;
+	std::vector<CU::fileInfo> fileInfo;
+	int fileTabSelected = 0;
 	std::vector<std::string> clipboard;
 	std::string selected;
+
+	bool cursorBlink = false;
+	uint64_t cursorTime = 0;
 
 	CU::Project project;
 
@@ -51,7 +63,7 @@ public:
 	void close();
 	void handleInt();
 	void drawGUI();
-	void doEditor();
+	void doEditor(CU::keyCode key);
 	void drawEditor();
 	void shutdown();
 

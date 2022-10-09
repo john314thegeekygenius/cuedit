@@ -39,6 +39,9 @@ typedef struct CUSettings {
 	CU::Color editor_bg_color;
 	CU::Color editor_fg_color;
 
+	CU::Color editor_line_bg_color;
+	CU::Color editor_line_fg_color;
+
 	// Application settings
 	// -----------------
 	CUBreakType handleBreak;
@@ -55,6 +58,13 @@ typedef struct CUSettings {
 		menu_fg_color = CU::Color::L_WHITE;
 		sub_menu_bg_color = CU::Color::BLACK;
 		sub_menu_fg_color = CU::Color::L_WHITE;
+
+		editor_bg_color = CU::Color::BLACK;
+		editor_fg_color = CU::Color::L_WHITE;
+
+		editor_line_bg_color = CU::Color::BLACK;
+		editor_line_fg_color = CU::Color::L_WHITE;
+
 		handleBreak = CUBreakType::COPY;
 	};
 
@@ -76,6 +86,12 @@ typedef struct CUSettings {
 
 		sub_menu_bg_color = set.sub_menu_bg_color;
 		sub_menu_fg_color = set.sub_menu_fg_color;		
+
+		editor_bg_color = set.editor_bg_color;
+		editor_fg_color = set.editor_fg_color;		
+
+		editor_line_bg_color = set.editor_line_bg_color;
+		editor_line_fg_color = set.editor_line_fg_color;		
 
 		handleBreak = set.handleBreak;
 	};

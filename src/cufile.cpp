@@ -15,12 +15,7 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 	path = o_path;
 
 	if(o_path == ""){
-		name = "Untitled";
-		// It's a new file, so no history
-		history.clear();
-		// Clear any data
-		data.clear();
-		fileLoaded = true;
+		return openNew("Untitled");
 	}
 
 	// Find the filename
@@ -46,10 +41,26 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 	std::ifstream f_stream(path);
 	if(f_stream.is_open()){
 		// Read the data
-		char buffer[0x80000];
-		while(f_stream.getline(buffer,0x80000) && strlen(buffer) > 0){
-			data += (char*)buffer;
+
+		// Get the file length
+		f_stream.seekg (0, f_stream.end);
+		int length = f_stream.tellg();
+
+		if(length > CU::MAX_FILE_SIZE){
+			return CU::ErrorCode::LARGE;
 		}
+
+		f_stream.seekg (0, f_stream.beg);
+		char * buffer = new char [length];
+
+		f_stream.read(buffer,length);
+		if(f_stream.bad()||f_stream.fail()){
+			return CU::ErrorCode::READ;
+		}
+		data.assign(buffer, buffer+length);
+		
+		delete[] buffer;
+
 		fileLoaded = true;
 	}else{
 		return CU::ErrorCode::OPEN;
@@ -57,12 +68,24 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 	return CU::ErrorCode::NONE;
 };
 
+CU::ErrorCode CU::File::openNew(std::string fname, CU::FileMode o_mode){
+	path = "";
+	name = fname;
+    mode = o_mode;
+	// It's a new file, so no history
+	history.clear();
+	// Clear any data
+	data.clear();
+	fileLoaded = true;
+	return CU::ErrorCode::NONE;
+};
+
 CU::ErrorCode CU::File::save(std::string s_path){
 	return CU::ErrorCode::NONE;
 };
 
-void CU::File::getData(std::string & data_in){
-	data_in = this->data;
+std::vector<char> &CU::File::getData(){
+	return data;
 };
 
 std::string CU::File::getName(){

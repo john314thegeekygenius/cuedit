@@ -257,8 +257,28 @@ void CU::Driver::writeBChar(CU::BlockChar c){
 	scrBuffer[(scrCurPos[1]*scrWidth) + scrCurPos[0]] = (int)c;	
 };
 
+void CU::Driver::writeBChar(CU::BlockChar c, CU::Color fg, CU::Color bg){
+	scrBuffer[(scrCurPos[1]*scrWidth) + scrCurPos[0]] = (int)c;	
+	scrBuffer[scrSize+(scrCurPos[1]*scrWidth) + scrCurPos[0]] = (((int)fg)<<8) | (int)bg;
+};
+
 void CU::Driver::drawBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, CU::Color bg){
-	int schar = (int)CU::BlockChar::HBAR;
+	int schar = 0;
+
+	switch(t){
+		case CU::BlockType::BLOCK:
+			schar = (int)CU::BlockChar::SOLID;
+			break;
+		case CU::BlockType::DOUBLE:
+			schar = (int)CU::BlockChar::DHBAR;
+			break;
+		case CU::BlockType::TXT:
+			schar = (int)'-';
+			break;
+		case CU::BlockType::SINGLE:
+			schar = (int)CU::BlockChar::HBAR;
+			break;
+	}
 	for(int e = x; e < x+w; e++){
 		int offset = (y*scrWidth) + e;
 		if(offset > 0 && offset < scrSize){
@@ -271,7 +291,20 @@ void CU::Driver::drawBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, 
 			scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 		}
 	}
-	schar = (int)CU::BlockChar::VBAR;
+	switch(t){
+		case CU::BlockType::BLOCK:
+			schar = (int)CU::BlockChar::SOLID;
+			break;
+		case CU::BlockType::DOUBLE:
+			schar = (int)CU::BlockChar::DVBAR;
+			break;
+		case CU::BlockType::TXT:
+			schar = (int)'|';
+			break;
+		case CU::BlockType::SINGLE:
+			schar = (int)CU::BlockChar::VBAR;
+			break;
+	}
 	for(int i = y; i < y+h; i++){
 		int offset = (i*scrWidth) + x;
 		if(offset > 0 && offset < scrSize){
@@ -284,24 +317,88 @@ void CU::Driver::drawBox(int x,int y,int w,int h,CU::BlockType t, CU::Color fg, 
 			scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 		}
 	}
+
+
+	switch(t){
+		case CU::BlockType::BLOCK:
+			schar = (int)CU::BlockChar::SOLID;
+			break;
+		case CU::BlockType::DOUBLE:
+			schar = (int)CU::BlockChar::DTLCORNER;
+			break;
+		case CU::BlockType::TXT:
+			schar = (int)'+';
+			break;
+		case CU::BlockType::SINGLE:
+			schar = (int)CU::BlockChar::TLCORNER;
+			break;
+	}
+
 	int offset = (y*scrWidth) + x;
+
 	if(offset > 0 && offset < scrSize){
-		scrBuffer[offset] = (int)CU::BlockChar::TLCORNER;
+		scrBuffer[offset] = (int)schar;
 		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 	}
+
+	switch(t){
+		case CU::BlockType::BLOCK:
+			schar = (int)CU::BlockChar::SOLID;
+			break;
+		case CU::BlockType::DOUBLE:
+			schar = (int)CU::BlockChar::DTRCORNER;
+			break;
+		case CU::BlockType::TXT:
+			schar = (int)'+';
+			break;
+		case CU::BlockType::SINGLE:
+			schar = (int)CU::BlockChar::TRCORNER;
+			break;
+	}
+
 	offset = (y*scrWidth) + x + w-1;
 	if(offset > 0 && offset < scrSize){
-		scrBuffer[offset] = (int)CU::BlockChar::TRCORNER;
+		scrBuffer[offset] = (int)schar;
 		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+	}
+
+	switch(t){
+		case CU::BlockType::BLOCK:
+			schar = (int)CU::BlockChar::SOLID;
+			break;
+		case CU::BlockType::DOUBLE:
+			schar = (int)CU::BlockChar::DBLCORNER;
+			break;
+		case CU::BlockType::TXT:
+			schar = (int)'+';
+			break;
+		case CU::BlockType::SINGLE:
+			schar = (int)CU::BlockChar::BLCORNER;
+			break;
 	}
 	offset = (y*scrWidth) + x + ((h-1)*scrWidth);
 	if(offset > 0 && offset < scrSize){
-		scrBuffer[offset] = (int)CU::BlockChar::BLCORNER;
+		scrBuffer[offset] = (int)schar;
 		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
+	}
+
+	switch(t){
+		case CU::BlockType::BLOCK:
+			schar = (int)CU::BlockChar::SOLID;
+			break;
+		case CU::BlockType::DOUBLE:
+			schar = (int)CU::BlockChar::DBRCORNER;
+			break;
+		case CU::BlockType::TXT:
+			schar = (int)'+';
+			break;
+		case CU::BlockType::SINGLE:
+			schar = (int)CU::BlockChar::BRCORNER;
+			break;
 	}
 	offset = (y*scrWidth) + x + ((h-1)*scrWidth) + w-1;
 	if(offset > 0 && offset < scrSize){
-		scrBuffer[offset] = (int)CU::BlockChar::BRCORNER;
+		scrBuffer[offset] = (int)schar;
 		scrBuffer[scrSize+offset] = (((int)fg)<<8) | (int)bg;
 	}
 };
@@ -432,37 +529,6 @@ void CU::Driver::writeStrW(std::string s, int x,int y, int w, Color fg, Color bg
 	writeStr(short_str,x,y,fg,bg);
 };
 
-void CU::Driver::writeStrCWR(std::string s, int x,int y, int w){
-	std::string short_str = "";
-	int ext_pos = s.length();
-	for(int i = s.length()-1; i >= 0; i--){
-		if(s.at(i)=='.'){
-			ext_pos = i;
-			break;
-		}
-	}
-
-	for(int i = ext_pos-(w-4); i < ext_pos; i++){
-		if(s.at(i)=='.'){
-			break;
-		} 
-		if(i >= w){
-			short_str.push_back('*');
-			break;
-		}
-		short_str.push_back(s.at(i));
-	}
-
-	for(int i = ext_pos; i < s.length(); i++){
-		if(i >= ext_pos+4){
-			short_str.push_back('*');
-			break;
-		}
-		short_str.push_back(s.at(i));
-	}
-	
-	writeStr(short_str,x+(w>>1)-(short_str.length()>>1),y);
-};
 
 void CU::Driver::kbNoDelay(){
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
@@ -563,6 +629,13 @@ std::string CU::to_string(int value,int fill){
 	return ss.str();
 };
 
+std::string CU::to_stringc(int value,char fillc, int fillw){
+	std::stringstream ss;
+	ss << std::setw(fillw) << std::setfill(fillc) << value;
+	return ss.str();
+};
+
+
 void CU::Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int maxh){
 	if(x < minx) { x = minx; }
 	if(y < miny) { y = miny; }
@@ -572,6 +645,45 @@ void CU::Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int
 	if(h < 0) { h = 0; }
 };
 
+std::string CU::trimString(std::string s, int w){
+	std::string short_str = "";
+	int offset = s.length()-(w-1);
+	if(offset < 0 ) { offset = 0; }
+	for(int i = offset; i < s.length(); i++){
+		short_str.push_back(s.at(i));
+	}
+	return short_str;
+};
+
+std::string CU::fileizeString(std::string s, int fnw, int exw){
+	std::string short_str = "";
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			break;
+		} 
+		if(i >= fnw){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	int ext_pos = s.length();
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			ext_pos = i;
+			break;
+		}
+	}
+	for(int i = ext_pos; i < s.length(); i++){
+		if(i >= ext_pos+exw){
+			short_str.push_back('*');
+			break;
+		}
+		short_str.push_back(s.at(i));
+	}
+	
+	return short_str;
+};
 
 
 std::ofstream debugFile;
