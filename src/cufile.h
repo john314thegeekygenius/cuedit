@@ -35,10 +35,14 @@ private:
     std::string name;// Name of the file
     std::string path;// Where the file is located
     FileMode mode;   // What mode is the file opened in
-    bool fileLoaded; // Is the file fully read
 
 	std::vector<std::string> history;
 	std::vector<char> data;
+public:
+    bool fileLoaded; // Is the file fully read
+    bool modified; // Is the file modified since last save
+    bool hasBeenSaved; // Has the file been saved yet
+
 public:
     ErrorCode open(std::string path, FileMode mode = FileMode::READ_ONLY);
     ErrorCode openNew(std::string fname, FileMode mode = FileMode::READ_ONLY);

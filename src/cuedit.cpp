@@ -23,6 +23,10 @@ void breakHandle(int e){
 int main(int argc, char *argv[]){
 	CU::openDebugFile();
 	editor.init();
+
+	// Make CUEdit open files from the arguments list
+	editor.loadArgFiles(argc, argv);
+
 	editor.run();
 	editor.shutdown();
 	CU::closeDebugFile();
@@ -651,7 +655,13 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		if(access_type == CU::FileAccess::READ){
 			videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
 		}else{
-			videoDriver.writeStrW((fileSelectSelected?"":"["+"Write"+(fileSelectSelected?"":"["+": "+WriteFileName, menuX + 1, menuY + menuHeight-4,30);
+			std::string writestr = "";
+			if(!fileSelectSelected) { writestr += '['; }
+			writestr += "Write";
+			if(!fileSelectSelected) { writestr += ']'; }
+			writestr += ": ";
+			writestr += WriteFileName;
+			videoDriver.writeStrW(writestr, menuX + 1, menuY + menuHeight-4,30);
 		}
 
 		std::string permissionString = "";
@@ -778,6 +788,18 @@ std::string CUEditor::openFile(){
 std::string CUEditor::saveFile(){
 
 	return openFileDialog("Save File",CU::FileAccess::WRITE);
+};
+
+void CUEditor::loadArgFiles(int argc, char *argv[]){
+	for(int i = 1; i < argc; i++){
+		if(std::strcmp(argv[i],"/no-color")==0){
+			// Force no color support
+		}
+		if(std::strcmp(argv[i],"/color")==0){
+			// Force color support
+
+		}
+	}
 };
 
 void CUEditor::closeCurrentFile(){
@@ -995,6 +1017,7 @@ void CUEditor::doEditor(CU::keyCode key){
 		// Move the cursor
 		fileInfo[fileTabSelected].cursorX += 1;
 		fileInfo[fileTabSelected].cursorMovedDir = 1;
+		fileList[fileTabSelected].modified = true;
 	}
 	if(key == CU::keyCode::k_enter){
 		// Add a newline to the file
@@ -1003,6 +1026,7 @@ void CUEditor::doEditor(CU::keyCode key){
 		// Move the cursor
 		fileInfo[fileTabSelected].cursorX += 1;
 		fileInfo[fileTabSelected].cursorMovedDir = 1;
+		fileList[fileTabSelected].modified = true;
 	}
 	if(key == CU::keyCode::k_backspace){
 		// Remove a char from the file
@@ -1019,12 +1043,14 @@ void CUEditor::doEditor(CU::keyCode key){
 			if(filedata.size()&&fileInfo[fileTabSelected].cursorOffset<filedata.size()){
 				filedata.erase(filedata.begin()+fileInfo[fileTabSelected].cursorOffset);
 			}
+			fileList[fileTabSelected].modified = true;
 		}else{
 			fileInfo[fileTabSelected].cursorOffset -= 1;
 			if(filedata.size()&&fileInfo[fileTabSelected].cursorOffset >= 0 && fileInfo[fileTabSelected].cursorOffset < filedata.size()){
 				filedata.erase(filedata.begin()+fileInfo[fileTabSelected].cursorOffset);
 			}
 			fileInfo[fileTabSelected].cursorOffset += 1;
+			fileList[fileTabSelected].modified = true;
 		}
 	}
 	if(key == CU::keyCode::s_delete){
@@ -1033,6 +1059,7 @@ void CUEditor::doEditor(CU::keyCode key){
 		if(filedata.size()&&fileInfo[fileTabSelected].cursorOffset<filedata.size()){
 			filedata.erase(filedata.begin()+fileInfo[fileTabSelected].cursorOffset);
 		}
+		fileList[fileTabSelected].modified = true;
 	}
 
 	if(key == CU::keyCode::s_left){
@@ -1099,7 +1126,8 @@ void CUEditor::drawEditor(){
 	// Handle tab scrolling
 
 	int fileCount = 0;
-	int max_files_on_line = videoDriver.getWidth() / 16;
+	int tabWidth = 20;
+	int max_files_on_line = videoDriver.getWidth() / tabWidth;
 	for(int e = 0; e < fileList.size() && e < max_files_on_line; e++){
 		char LBChar = (e==fileTabSelected)?'<':'[';
 		char RBChar = (e==fileTabSelected)?'>':']';
@@ -1113,13 +1141,16 @@ void CUEditor::drawEditor(){
 		std::string title_str;
 		title_str = fileList[e].getName();
 
-		title_str = CU::fileizeString(title_str, 10,4);
+		title_str = CU::fileizeString(title_str, (tabWidth-8),4);
+		if(fileList[e].modified){
+			title_str += " *";
+		}
 		if(fileCount){
 			title_str += "("+std::to_string(fileCount)+")";
 		}
-		videoDriver.writeStr(LBChar+title_str+RBChar, winX + (e * 16)+7-(title_str.length()>>1), winY);
-		videoDriver.writeStr((e==fileTabSelected)?"[":"|",winX+(e*16),winY);
-		videoDriver.writeStr((e==fileTabSelected)?"]":"|",winX+(e*16)+15,winY);
+		videoDriver.writeStr(LBChar+title_str+RBChar, winX + (e * tabWidth)+(tabWidth>>1)-(title_str.length()>>1), winY);
+		videoDriver.writeStr((e==fileTabSelected)?"[":"|",winX+(e*tabWidth),winY);
+		videoDriver.writeStr((e==fileTabSelected)?"]":"|",winX+(e*tabWidth)+tabWidth-1,winY);
 	}
 
 	// Draw the file in an editor
@@ -1207,7 +1238,7 @@ void CUEditor::drawEditor(){
 		lineCount += 1;
 		
 		videoDriver.writeStr(lineNumStr,winX+1,winY+1+line_idx,settings.editor_line_fg_color, settings.editor_line_bg_color);
-		videoDriver.writeStr(lineString,winX+maxLineNumWidth+2,winY+1+line_idx,settings.editor_line_fg_color, settings.editor_line_bg_color);
+		videoDriver.writeStr(lineString,winX+maxLineNumWidth+2,winY+1+line_idx,settings.editor_fg_color, settings.editor_bg_color);
 		videoDriver.setCurPos(winX+maxLineNumWidth+1,winY+1+line_idx);
 		videoDriver.writeBChar(CU::BlockChar::DVBAR);
 	}

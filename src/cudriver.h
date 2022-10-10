@@ -170,6 +170,9 @@ public:
 	void enableEcho();
 	void disableEcho();
 
+	void enableColor();
+	void disableColor();
+
 	void setCurPos(int x,int y);
 //	void hideCursor();
 //	void showCursor();
@@ -206,6 +209,8 @@ std::string to_stringc(int value,char fillc = '0', int fillw = 1);
 std::string trimString(std::string s, int w);
 
 std::string fileizeString(std::string s, int fnw, int exw);
+
+std::string filenameString(std::string s);
 
 void Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int maxh);
 

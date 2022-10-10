@@ -18,16 +18,10 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 		return openNew("Untitled");
 	}
 
-	// Find the filename
-	int e = 0;
-	for(int i = path.length()-1; i >= 0; i --){
-		if(path.at(i)=='/'){ e = i; break; }
-	}
-	name = "";
-	for(int i = e; i < path.length(); i ++){
-		name.push_back(path.at(i));
-	}
+	name = CU::filenameString(o_path);
+
     mode = o_mode;
+
     fileLoaded = false;
 
 	// TODO:
@@ -71,6 +65,8 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 		delete[] buffer;
 
 		fileLoaded = true;
+		modified = false;
+		hasBeenSaved = true;
 	}else{
 		return CU::ErrorCode::OPEN;
 	}
@@ -86,6 +82,11 @@ CU::ErrorCode CU::File::openNew(std::string fname, CU::FileMode o_mode){
 	// Clear any data
 	data.clear();
 	fileLoaded = true;
+	// Nothing has been changed since the last save
+	modified = false;
+	// We just saved the file
+	hasBeenSaved = false;
+
 	return CU::ErrorCode::NONE;
 };
 
@@ -102,6 +103,14 @@ CU::ErrorCode CU::File::save(std::string s_path, FileMode o_mode){
 			}
 		}
 		f_stream.close();
+		// Reset the file path
+		path = s_path;
+		// Rename the file
+		name = CU::filenameString(s_path);
+		// Nothing has been changed since the last save
+		modified = false;
+		// We just saved the file
+		hasBeenSaved = false;
 		return CU::ErrorCode::NONE;
 	}else{
 		return CU::ErrorCode::OPEN;

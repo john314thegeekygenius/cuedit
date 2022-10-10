@@ -151,6 +151,14 @@ void CU::Driver::disableEcho(){
     tcsetattr(fileno(stdin), 0, &term);
 };
 
+void CU::Driver::enableColor(){
+	colorSupported = true;
+};
+
+void CU::Driver::disableColor(){
+	colorSupported = false;
+};
+
 void CU::Driver::setCurPos(int x,int y){
 	scrCurPos[0] = x;
 	scrCurPos[1] = y;
@@ -720,6 +728,22 @@ std::string CU::fileizeString(std::string s, int fnw, int exw){
 	
 	return short_str;
 };
+
+std::string CU::filenameString(std::string s){
+	std::string short_str = "";
+	int fnameBegin = 0;
+	for(int i = s.length()-1; i >= 0; i--){
+		if(s.at(i)=='/'){
+			fnameBegin = i;
+			break;
+		} 
+	}
+	for(int i = fnameBegin; i < s.length(); i++){
+		short_str.push_back(s.at(i));
+	}
+	return short_str;
+};
+
 
 
 std::ofstream debugFile;
