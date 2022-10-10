@@ -575,6 +575,8 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 
 	loadDirectory("");
 
+	bool fileSelectSelected = true;
+
 	while(dialogOpen){
 		// Draw the window
 
@@ -621,7 +623,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 			
 			videoDriver.writeStr(folderFileTimes[fileOffset].second, menuX + menuWidth-4-(folderFileTimes[fileOffset].second.length()), menuY+i+1);
 			
-			if(fileSelected == fileOffset){
+			if(fileSelected == fileOffset && fileSelectSelected){
 				videoDriver.writeStr("[",menuX+1,menuY+i+1);
 				videoDriver.writeStr("]",menuX+menuWidth-3,menuY+i+1);
 			}
@@ -649,9 +651,8 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		if(access_type == CU::FileAccess::READ){
 			videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
 		}else{
-			videoDriver.writeStrW("Write: "+WriteFileName, menuX + 1, menuY + menuHeight-4,30);
+			videoDriver.writeStrW((fileSelectSelected?"":"["+"Write"+(fileSelectSelected?"":"["+": "+WriteFileName, menuX + 1, menuY + menuHeight-4,30);
 		}
-
 
 		std::string permissionString = "";
 		std::filesystem::file_status file_status = status(folderContents[fileSelected].path());
@@ -682,70 +683,76 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 			std::filesystem::current_path(originalPath,filesystemErrorCode); //set the path
 		}
 		if(key == CU::keyCode::k_tab){
+			fileSelectSelected = !fileSelectSelected;
 		}
-		if(key == CU::keyCode::s_up){
-			fileSelected -= 1;
-			if(fileSelected < 0){ fileSelected = 0; }
-		}
-		if(key == CU::keyCode::s_down){
-			fileSelected += 1;
-			if(fileSelected >= folderContents.size()) { fileSelected = folderContents.size()-1; }
+		if(fileSelectSelected){
+			if(key == CU::keyCode::s_up){
+				fileSelected -= 1;
+				if(fileSelected < 0){ fileSelected = 0; }
+			}
+			if(key == CU::keyCode::s_down){
+				fileSelected += 1;
+				if(fileSelected >= folderContents.size()) { fileSelected = folderContents.size()-1; }
+			}
 		}
 
 		if(key == CU::keyCode::k_enter){
-			// If it's a directory, enter it
-			if(folderContents[fileSelected].is_directory()){
-//				CU::debugWrite("Entering:"+std::string(folderContents[fileSelected].path()));
-				loadDirectory(std::string(folderContents[fileSelected].path()));
-			}else{
-				// Open the file if we can
-				if(access_type == CU::FileAccess::READ){
-					if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
-						ErrorMsgBox("File not accessible!");
-					}else{
-						dialogOpen = false;
-						fileList.emplace_back(CU::File());
-						CU::FileMode fmode = CU::FileMode::READ_ONLY;
-						if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
-							fmode = CU::FileMode::READ_WRITE;
-						}
-						CU::ErrorCode fecode = fileList.back().open(folderContents[fileSelected].path(),fmode);
-						if(fecode==CU::ErrorCode::OPEN){
-							ErrorMsgBox("Failed to open!"); 
-							fileList.pop_back();
-						}else if(fecode==CU::ErrorCode::READ){
-							ErrorMsgBox("Reading Error!"); 
-							fileList.pop_back();
-						}else if(fecode==CU::ErrorCode::LARGE){
-							ErrorMsgBox("File too large!"); 
-							fileList.pop_back();
-						}else {
-							fpath = folderContents[fileSelected].path();
-							fileTabSelected = fileList.size()-1;
-							CU::fileInfo finfo;
-							fileInfo.push_back(finfo);
+			if(fileSelectSelected){
+				// If it's a directory, enter it
+				if(folderContents[fileSelected].is_directory()){
+	//				CU::debugWrite("Entering:"+std::string(folderContents[fileSelected].path()));
+					loadDirectory(std::string(folderContents[fileSelected].path()));
+				}else{
+					// Open the file if we can
+					if(access_type == CU::FileAccess::READ){
+						if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
+							ErrorMsgBox("File not accessible!");
+						}else{
+							dialogOpen = false;
+							fileList.emplace_back(CU::File());
+							CU::FileMode fmode = CU::FileMode::READ_ONLY;
+							if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
+								fmode = CU::FileMode::READ_WRITE;
+							}
+							CU::ErrorCode fecode = fileList.back().open(folderContents[fileSelected].path(),fmode);
+							if(fecode==CU::ErrorCode::OPEN){
+								ErrorMsgBox("Failed to open!"); 
+								fileList.pop_back();
+							}else if(fecode==CU::ErrorCode::READ){
+								ErrorMsgBox("Reading Error!"); 
+								fileList.pop_back();
+							}else if(fecode==CU::ErrorCode::LARGE){
+								ErrorMsgBox("File too large!"); 
+								fileList.pop_back();
+							}else {
+								fpath = folderContents[fileSelected].path();
+								fileTabSelected = fileList.size()-1;
+								CU::fileInfo finfo;
+								fileInfo.push_back(finfo);
+							}
 						}
 					}
-				}else{
-					if( (folder_status.permissions() & std::filesystem::perms::group_write) == std::filesystem::perms::none){
-						ErrorMsgBox("Cannot write to directory");
-					}else{
-						// Write the file
-						dialogOpen = false;
-						CU::FileMode fmode = CU::FileMode::READ_WRITE;
-						CU::ErrorCode fecode = fileList[fileTabSelected].save(WriteFileName,fmode);
-						if(fecode==CU::ErrorCode::OPEN){
-							ErrorMsgBox("Failed to open!"); 
-							fileList.pop_back();
-						}else if(fecode==CU::ErrorCode::WRITE){
-							ErrorMsgBox("Writing Error!"); 
-							fileList.pop_back();
-						}else if(fecode==CU::ErrorCode::LARGE){
-							ErrorMsgBox("File too large!"); 
-							fileList.pop_back();
-						}else {
-							fpath = folderContents[fileTabSelected].path();
-						}
+				}
+			}else{
+				if(access_type == CU::FileAccess::WRITE){
+//						if( (folder_status.permissions() & std::filesystem::perms::group_write) == std::filesystem::perms::none){
+//							ErrorMsgBox("Cannot write to directory");
+//						}else{
+					// Write the file
+					dialogOpen = false;
+					CU::FileMode fmode = CU::FileMode::READ_WRITE;
+					CU::ErrorCode fecode = fileList[fileTabSelected].save(WriteFileName,fmode);
+					if(fecode==CU::ErrorCode::OPEN){
+						ErrorMsgBox("Failed to open!"); 
+						fileList.pop_back();
+					}else if(fecode==CU::ErrorCode::WRITE){
+						ErrorMsgBox("Writing Error!"); 
+						fileList.pop_back();
+					}else if(fecode==CU::ErrorCode::LARGE){
+						ErrorMsgBox("File too large!"); 
+						fileList.pop_back();
+					}else {
+						fpath = folderContents[fileTabSelected].path();
 					}
 				}
 			}
