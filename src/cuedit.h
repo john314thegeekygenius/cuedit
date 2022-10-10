@@ -25,9 +25,11 @@ typedef struct fileInfo {
 	int cursorY = 0;
 	int scrollX = 0;
 	int scrollY = 0;
+	int cursorMovedDir = 0; // 0-left 1-right 2-up 3-down
 	int cursorOffset = 0;
 }fileInfo;
 
+const int FileLineMax = 999999;
 };
 
 class CUEditor {
@@ -65,12 +67,14 @@ public:
 	void drawGUI();
 	void fixCursor();
 	void doEditor(CU::keyCode key);
+	void closeCurrentFile();
 	void drawEditor();
 	void shutdown();
 
 	void createFile();
 
 	std::string openFile();
+	std::string saveFile();
 	void ErrorMsgBox(std::string error);
 
 };

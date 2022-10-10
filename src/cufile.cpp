@@ -47,6 +47,7 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 		int length = f_stream.tellg();
 
 		if(length > CU::MAX_FILE_SIZE){
+			f_stream.close();
 			return CU::ErrorCode::LARGE;
 		}
 
@@ -55,6 +56,7 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 
 		f_stream.read(buffer,length);
 		if(f_stream.bad()||f_stream.fail()){
+			f_stream.close();
 			return CU::ErrorCode::READ;
 		}
 		data.assign(buffer, buffer+length);
@@ -64,6 +66,7 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 				data.erase(data.begin()+i);
 			}
 		}
+		f_stream.close();
 		
 		delete[] buffer;
 
@@ -82,12 +85,28 @@ CU::ErrorCode CU::File::openNew(std::string fname, CU::FileMode o_mode){
 	history.clear();
 	// Clear any data
 	data.clear();
-	data.push_back('\n'); // Add a new line
 	fileLoaded = true;
 	return CU::ErrorCode::NONE;
 };
 
-CU::ErrorCode CU::File::save(std::string s_path){
+CU::ErrorCode CU::File::save(std::string s_path, FileMode o_mode){
+	// Open the file
+	std::ofstream f_stream(s_path);
+	if(f_stream.is_open()){
+		if(data.size()){
+			f_stream.write(data.data(),data.size());
+			CU::debugWrite(std::string(data.data()));
+			if(f_stream.bad()||f_stream.fail()){
+				f_stream.close();
+				return CU::ErrorCode::WRITE;
+			}
+		}
+		f_stream.close();
+		return CU::ErrorCode::NONE;
+	}else{
+		return CU::ErrorCode::OPEN;
+	}
+
 	return CU::ErrorCode::NONE;
 };
 

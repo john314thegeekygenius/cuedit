@@ -1,89 +1,10 @@
 
 namespace CU {
 
-
-/*
-
-// Special
-INFO:Key pressed 27
-INFO:Key pressed 91
-// Left
-INFO:Key pressed 68
-// Special
-INFO:Key pressed 27
-INFO:Key pressed 91
-// Special 2
-INFO:Key pressed 49
-INFO:Key pressed 59
-// CTRL
-INFO:Key pressed 53
-// Left
-INFO:Key pressed 68
-
-
-// Special
-INFO:Key pressed 27
-INFO:Key pressed 91
-// Special 2
-INFO:Key pressed 49
-INFO:Key pressed 59
-// SHIFT
-INFO:Key pressed 50
-// Left
-INFO:Key pressed 68
-
-// Special
-INFO:Key pressed 27
-INFO:Key pressed 91
-// Special 2
-INFO:Key pressed 49
-INFO:Key pressed 59
-// ALT
-INFO:Key pressed 51
-// Left
-INFO:Key pressed 68
-
-// Function Special
-INFO:Key pressed 27
-INFO:Key pressed 79
-// F2
-INFO:Key pressed 81
-
-// Function Special
-INFO:Key pressed 27
-INFO:Key pressed 79
-// F4
-INFO:Key pressed 83
-
-//// Special Keys
-// Up
-INFO:Key pressed 65
-// Down
-INFO:Key pressed 66
-// Left
-INFO:Key pressed 68
-// Right
-INFO:Key pressed 67
-
-// Home
-INFO:Key pressed 72
-// Page up
-INFO:Key pressed 53
-INFO:Key pressed 126
-// End
-INFO:Key pressed 70
-// Page down
-INFO:Key pressed 54
-INFO:Key pressed 126
-// Insert
-INFO:Key pressed 50
-INFO:Key pressed 126
-*/
-
 enum class keyCode {
 	k_null = 0,
 	k_bell = 7, // ????
-	k_backspace = 8,
+	k_backspace = 127, // Should be 8???
 	k_tab = 9,
 	k_return = 10, k_enter = 10, // Same keycode, different name
 	k_vertical_tab = 11, // ????
@@ -157,7 +78,7 @@ enum class keyCode {
     k_r_bracket = 93,
     k_carrot = 94,
     k_underscore = 95,
-    k_grave = 96, k_quote_mark = 96,
+    k_tilde = 96,
 
     l_a = 97,
     l_b = 98,
@@ -189,8 +110,7 @@ enum class keyCode {
     k_l_c_bracket = 123,
     k_bar = 124,
     k_r_c_bracket = 125,
-    k_tilde = 126,
-    k_delete = 127,
+    k_grave = 126, k_quote_mark = 126,
 
 	// special keys
 	s_up = 0x100,
@@ -202,6 +122,8 @@ enum class keyCode {
     s_pg_down = 0x105,
     s_home = 0x106,
     s_end = 0x107,
+
+    s_delete = 0x108,
 
 	// control masks
 	c_ctrl = 0x200,

@@ -540,7 +540,7 @@ void CU::Driver::kbNoDelay(){
 	// Make this work???
 	// https://stackoverflow.com/questions/40574789/how-to-detect-xoff-and-xon-in-linux-terminal-application
 	term.c_lflag &= ~IXON;
-	
+
 	tcsetattr(0, TCSANOW, &term); // 0 is STDIN
 	setbuf(stdin, NULL);
 
@@ -560,19 +560,7 @@ char CU::Driver::getch() {
 	debugWrite("Raw:"+std::to_string(buf));
 	return (buf);
 };
-/*
-Ctrl + End
-INFO:Raw bytes:6
-INFO:Raw:27
-INFO:Raw:91
 
-INFO:Raw:49 // 0x31
-INFO:Raw:59 // 0x3B
-
-INFO:Raw:53 // Ctrl
-
-INFO:Raw:70
-*/
 CU::keyCode CU::Driver::getkey() {
 	int key = (int)CU::keyCode::k_null;
 	int keyCount = kbhit();
@@ -605,6 +593,12 @@ CU::keyCode CU::Driver::getkey() {
 							}
 						}
 						if(keyCount==4){
+							if(specialcheck == 0x33){
+								ch = getch();
+								if(ch == 126) {
+									key |= (int)CU::keyCode::s_delete;
+								}
+							}
 							if(specialcheck == 0x35){
 								ch = getch();
 								if(ch == 126) {

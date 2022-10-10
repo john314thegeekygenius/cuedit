@@ -25,6 +25,7 @@ enum class ErrorCode {
     READ_ONLY = 2,
     READ = 3,
     LARGE = 4,
+    WRITE = 5,
 };
 
 class File {
@@ -41,7 +42,7 @@ private:
 public:
     ErrorCode open(std::string path, FileMode mode = FileMode::READ_ONLY);
     ErrorCode openNew(std::string fname, FileMode mode = FileMode::READ_ONLY);
-    ErrorCode save(std::string path);
+    ErrorCode save(std::string path, FileMode mode = FileMode::READ_ONLY);
     std::vector<char> &getData();
     std::string getName();
     std::string getPath();
