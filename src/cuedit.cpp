@@ -444,9 +444,14 @@ std::string CUEditor::openFile(){
 
 	std::error_code filesystemErrorCode;
 
+	using namespace std::chrono_literals;
+
 	auto addTime = [&](std::filesystem::file_time_type ftime) { 
-		std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(ftime));
-		std::tm *tstruct = localtime(&cftime);
+		using namespace std::chrono;
+		auto sctp = time_point_cast<system_clock::duration>(ftime - std::filesystem::file_time_type::clock::now() + system_clock::now());
+
+		std::time_t cftime = system_clock::to_time_t(sctp);
+		std::tm *tstruct = std::localtime(&cftime);
 
 		std::string dateString = "";
 		dateString += std::to_string(tstruct->tm_mon+1)+"/";
@@ -750,8 +755,11 @@ std::string CUEditor::saveFile(){
 	std::error_code filesystemErrorCode;
 
 	auto addTime = [&](std::filesystem::file_time_type ftime) { 
-		std::time_t cftime = std::chrono::system_clock::to_time_t(std::chrono::file_clock::to_sys(ftime));
-		std::tm *tstruct = localtime(&cftime);
+		using namespace std::chrono;
+		auto sctp = time_point_cast<system_clock::duration>(ftime - std::filesystem::file_time_type::clock::now() + system_clock::now());
+
+		std::time_t cftime = system_clock::to_time_t(sctp);
+		std::tm *tstruct = std::localtime(&cftime);
 
 		std::string dateString = "";
 		dateString += std::to_string(tstruct->tm_mon+1)+"/";

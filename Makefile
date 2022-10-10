@@ -1,7 +1,7 @@
 
 OBJ_FILES := obj/cuedit.o obj/cudriver.o obj/cumenu.o obj/cufile.o obj/cuproject.o
 
-CXX_FLAGS := -std=c++20 
+CXX_FLAGS := -std=c++17
 #-O3
 
 
