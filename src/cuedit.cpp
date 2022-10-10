@@ -765,7 +765,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 
 std::string CUEditor::openFile(){
 
-	return openFileDialog("Open File",CU::FileAccess::OPEN);
+	return openFileDialog("Open File",CU::FileAccess::READ);
 };
 
 std::string CUEditor::saveFile(){
