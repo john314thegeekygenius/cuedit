@@ -30,6 +30,12 @@ typedef struct fileInfo {
 }fileInfo;
 
 const int FileLineMax = 999999;
+
+enum class FileAccess {
+	READ = 0,
+	WRITE = 1,
+};
+
 };
 
 class CUEditor {
@@ -73,6 +79,7 @@ public:
 
 	void createFile();
 
+	std::string openFileDialog(std::string name, CU::FileAccess access_type);
 	std::string openFile();
 	std::string saveFile();
 	void ErrorMsgBox(std::string error);

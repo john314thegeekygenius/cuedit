@@ -418,7 +418,7 @@ void CUEditor::loadSettings(){
 	 	
 };
 
-std::string CUEditor::openFile(){
+std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_type){
 	bool dialogOpen = true;
 	int menuWidth = 48;
 	int menuHeight = 16;
@@ -585,7 +585,7 @@ std::string CUEditor::openFile(){
 		videoDriver.drawSubBox(menuX,menuY+contentHeight,menuWidth, 5, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
 		// Draw a title bar
 		videoDriver.drawBar(menuX,menuY,menuWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
-		videoDriver.writeStr("Open File", menuX + (menuWidth>>1)-5, menuY);
+		videoDriver.writeStr(WinName, menuX + (menuWidth>>1)-5, menuY);
 
 		// Write all the files
 		for(int i = 0; i < contentHeight-1; i++){
@@ -644,21 +644,32 @@ std::string CUEditor::openFile(){
 		}
 
 		// Write some text
-		videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
+		// std::string(folderContents[fileSelected].path().filename())
+		std::string WriteFileName = "dummy.txt";
+		if(access_type == CU::FileAccess::READ){
+			videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
+		}else{
+			videoDriver.writeStrW("Write: "+WriteFileName, menuX + 1, menuY + menuHeight-4,30);
+		}
+
 
 		std::string permissionString = "";
 		std::filesystem::file_status file_status = status(folderContents[fileSelected].path());
-		if( (file_status.permissions() & std::filesystem::perms::group_read) != std::filesystem::perms::none){
-			permissionString += "Read ";
-		}
-		if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
-			permissionString += "Write ";
-		}
-		if( (file_status.permissions() & std::filesystem::perms::group_exec) != std::filesystem::perms::none){
-			permissionString += "Execute";
-		}
+		std::filesystem::file_status folder_status = status(folderContents[fileSelected].path().parent_path());
 
-		videoDriver.writeStrW("Permisions: "+permissionString, menuX + 1, menuY + menuHeight-3,30);
+		if(access_type == CU::FileAccess::READ){
+			if( (file_status.permissions() & std::filesystem::perms::group_read) != std::filesystem::perms::none){
+				permissionString += "Read ";
+			}
+			if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
+				permissionString += "Write ";
+			}
+			if( (file_status.permissions() & std::filesystem::perms::group_exec) != std::filesystem::perms::none){
+				permissionString += "Execute";
+			}
+
+			videoDriver.writeStrW("Permisions: "+permissionString, menuX + 1, menuY + menuHeight-3,30);
+		}
 
 		videoDriver.writeStr("Last modified:"+folderFileTimes[fileSelected].first+" "+folderFileTimes[fileSelected].second, menuX + 1, menuY + menuHeight-2);
 
@@ -688,30 +699,53 @@ std::string CUEditor::openFile(){
 				loadDirectory(std::string(folderContents[fileSelected].path()));
 			}else{
 				// Open the file if we can
-				if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
-					ErrorMsgBox("File not accessible!");
-				}else{
-					dialogOpen = false;
-					fileList.emplace_back(CU::File());
-					CU::FileMode fmode = CU::FileMode::READ_ONLY;
-					if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
-						fmode = CU::FileMode::READ_WRITE;
+				if(access_type == CU::FileAccess::READ){
+					if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
+						ErrorMsgBox("File not accessible!");
+					}else{
+						dialogOpen = false;
+						fileList.emplace_back(CU::File());
+						CU::FileMode fmode = CU::FileMode::READ_ONLY;
+						if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
+							fmode = CU::FileMode::READ_WRITE;
+						}
+						CU::ErrorCode fecode = fileList.back().open(folderContents[fileSelected].path(),fmode);
+						if(fecode==CU::ErrorCode::OPEN){
+							ErrorMsgBox("Failed to open!"); 
+							fileList.pop_back();
+						}else if(fecode==CU::ErrorCode::READ){
+							ErrorMsgBox("Reading Error!"); 
+							fileList.pop_back();
+						}else if(fecode==CU::ErrorCode::LARGE){
+							ErrorMsgBox("File too large!"); 
+							fileList.pop_back();
+						}else {
+							fpath = folderContents[fileSelected].path();
+							fileTabSelected = fileList.size()-1;
+							CU::fileInfo finfo;
+							fileInfo.push_back(finfo);
+						}
 					}
-					CU::ErrorCode fecode = fileList.back().open(folderContents[fileSelected].path(),fmode);
-					if(fecode==CU::ErrorCode::OPEN){
-						ErrorMsgBox("Failed to open!"); 
-						fileList.pop_back();
-					}else if(fecode==CU::ErrorCode::READ){
-						ErrorMsgBox("Reading Error!"); 
-						fileList.pop_back();
-					}else if(fecode==CU::ErrorCode::LARGE){
-						ErrorMsgBox("File too large!"); 
-						fileList.pop_back();
-					}else {
-						fpath = folderContents[fileSelected].path();
-						fileTabSelected = fileList.size()-1;
-						CU::fileInfo finfo;
-						fileInfo.push_back(finfo);
+				}else{
+					if( (folder_status.permissions() & std::filesystem::perms::group_write) == std::filesystem::perms::none){
+						ErrorMsgBox("Cannot write to directory");
+					}else{
+						// Write the file
+						dialogOpen = false;
+						CU::FileMode fmode = CU::FileMode::READ_WRITE;
+						CU::ErrorCode fecode = fileList[fileTabSelected].save(WriteFileName,fmode);
+						if(fecode==CU::ErrorCode::OPEN){
+							ErrorMsgBox("Failed to open!"); 
+							fileList.pop_back();
+						}else if(fecode==CU::ErrorCode::WRITE){
+							ErrorMsgBox("Writing Error!"); 
+							fileList.pop_back();
+						}else if(fecode==CU::ErrorCode::LARGE){
+							ErrorMsgBox("File too large!"); 
+							fileList.pop_back();
+						}else {
+							fpath = folderContents[fileTabSelected].path();
+						}
 					}
 				}
 			}
@@ -725,300 +759,18 @@ std::string CUEditor::openFile(){
 		videoDriver.flush();
 		//videoDriver.updateDriver();
 	}
+
 	return fpath;
 };
 
+std::string CUEditor::openFile(){
+
+	return openFileDialog("Open File",CU::FileAccess::OPEN);
+};
+
 std::string CUEditor::saveFile(){
-	bool dialogOpen = true;
-	int menuWidth = 48;
-	int menuHeight = 16;
-	int menuX = (videoDriver.getWidth()>>1) - (menuWidth>>1);
-	int menuY = (videoDriver.getHeight()>>1) - (menuHeight>>1)+1;
-	int contentHeight = menuHeight - 5;
 
-	std::string fpath = "";
-	std::string lastModifiedString = "";
-
-	std::vector<std::filesystem::directory_entry> folderContents;
-	std::vector<std::string> folderContentNames;
-	std::vector<std::pair<std::string, std::string>> folderFileTimes;
-	std::vector<CU::EXEFileTypes> folderFileTypes;
-	std::filesystem::path folderPath = std::filesystem::current_path();
-	std::filesystem::path originalPath = std::filesystem::current_path();
-
-	bool openFileBool = true;
-	int fileSelected = 0;
-	int fileScroll = 0;
-
-	std::string parentPath = "";
-
-	std::error_code filesystemErrorCode;
-
-	auto addTime = [&](std::filesystem::file_time_type ftime) { 
-		using namespace std::chrono;
-		auto sctp = time_point_cast<system_clock::duration>(ftime - std::filesystem::file_time_type::clock::now() + system_clock::now());
-
-		std::time_t cftime = system_clock::to_time_t(sctp);
-		std::tm *tstruct = std::localtime(&cftime);
-
-		std::string dateString = "";
-		dateString += std::to_string(tstruct->tm_mon+1)+"/";
-		dateString += std::to_string(tstruct->tm_mday)+"/";
-		dateString += std::to_string(tstruct->tm_year+1900);
-
-		std::string timeString = "";
-		timeString += std::to_string(tstruct->tm_hour)+":";
-		timeString += std::to_string(tstruct->tm_min)+":";
-		timeString += std::to_string(tstruct->tm_sec);
-
-		folderFileTimes.push_back({dateString, timeString});
-	};
-
-	auto addFakeTime = [&](){
-		folderFileTimes.push_back({"1/1/1900", "0:0:0"});
-	};
-
-	auto loadDirectory = [&](std::string c_path) {
-		filesystemErrorCode.clear();
-		if(c_path.length()){
-			if(c_path.compare(".") == 0){
-				std::filesystem::current_path(std::filesystem::path("/."),filesystemErrorCode); //set the path
-			}else{
-				std::filesystem::current_path(std::filesystem::path(c_path),filesystemErrorCode); //set the path
-			}
-		}else{
-			std::filesystem::current_path(originalPath,filesystemErrorCode); //set the path
-		}
-
-		// TODO:
-		// Add error handleing
-		if(filesystemErrorCode.value()){
-			ErrorMsgBox(filesystemErrorCode.message());
-//			CU::debugWrite(filesystemErrorCode.message(),CU::DebugMsgType::ERROR);
-		}
-		
-		// Reset the folder path
-		folderPath = std::filesystem::current_path();
-		// Reset to 0
-		fileSelected = 0;
-		// Grab the parent path
-		parentPath = folderPath.parent_path(); 
-		// Remove any old path files
-		folderContents.clear();
-		folderContentNames.clear();
-		folderFileTimes.clear();
-		folderFileTypes.clear();
-
-		if(parentPath.length()){
-			std::filesystem::file_time_type ftime;
-			// Add a back options
-			filesystemErrorCode.clear();
-			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path("."),filesystemErrorCode));
-			folderContentNames.push_back(".");
-			folderFileTypes.push_back(CU::EXEFileTypes::Directory); // It's a directory
-
-			filesystemErrorCode.clear();
-			ftime = folderContents.back().last_write_time(filesystemErrorCode);
-			if(filesystemErrorCode.value()){
-				addFakeTime();
-			}else{
-				addTime(ftime);
-			}
-			filesystemErrorCode.clear();
-			folderContents.push_back(std::filesystem::directory_entry(std::filesystem::path(".."),filesystemErrorCode));
-			folderContentNames.push_back("..");
-			folderFileTypes.push_back(CU::EXEFileTypes::Directory); // It's a directory
-
-			filesystemErrorCode.clear();
-			ftime = folderContents.back().last_write_time(filesystemErrorCode);
-			if(filesystemErrorCode.value()){
-				addFakeTime();
-			}else{
-				addTime(ftime);
-			}
-			filesystemErrorCode.clear();
-		}
-
-		for (const auto & entry : std::filesystem::directory_iterator(folderPath)){
-			folderContents.push_back(entry);
-			folderContentNames.push_back(entry.path().filename());
-			
-			filesystemErrorCode.clear();
-			std::filesystem::file_time_type ftime = entry.last_write_time(filesystemErrorCode);
-			if(filesystemErrorCode.value()){
-				addFakeTime();
-			}else{
-				addTime(ftime);
-			}
-			filesystemErrorCode.clear();
-			if(entry.is_directory()){
-				folderFileTypes.push_back(CU::EXEFileTypes::Directory); // It's a directory
-			}else if(entry.is_symlink()){
-				folderFileTypes.push_back(CU::EXEFileTypes::Symbolic); // Symbolic Link
-			}else if(entry.is_regular_file()){
-				// Open the file and read the header
-				char headerBuffer[128];
-				FILE *fp = fopen(entry.path().c_str(),"rb");
-				if(fp!=NULL){
-					fread(&headerBuffer,128,1,fp);
-					fclose(fp); fp = NULL;
-					// Check the first two bytes
-					if(headerBuffer[0] == 'M' && headerBuffer[1] == 'Z'){
-						folderFileTypes.push_back(CU::EXEFileTypes::EXE); // Windows Executable
-					}else if(headerBuffer[0] == 0x7f && headerBuffer[1] == 0x45 && 
-							headerBuffer[2] == 0x4c && headerBuffer[3] == 0x46){
-						folderFileTypes.push_back(CU::EXEFileTypes::ELF); // ELF Executable
-					}else{
-						folderFileTypes.push_back(CU::EXEFileTypes::Normal); // Normal file
-					}
-				}else{
-					folderFileTypes.push_back(CU::EXEFileTypes::Broken); // Error opening
-				}
-			}else{
-				folderFileTypes.push_back(CU::EXEFileTypes::Unknown); // Unknown				
-			}
-			//CU::debugWrite(std::string(entry.path().filename())+"   "+timeString);
-		}
-	};
-
-	loadDirectory("");
-
-	while(dialogOpen){
-		// Draw the window
-
-		// Draw the background
-		videoDriver.drawBar(menuX,menuY,menuWidth,menuHeight, ' ', settings.sub_menu_fg_color, settings.sub_menu_bg_color);
-		// Draw a feild
-		videoDriver.drawBox(menuX,menuY,menuWidth,menuHeight, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
-		videoDriver.drawSubBox(menuX,menuY+contentHeight,menuWidth, 5, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
-		// Draw a title bar
-		videoDriver.drawBar(menuX,menuY,menuWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
-		videoDriver.writeStr("Save File", menuX + (menuWidth>>1)-5, menuY);
-
-		// Write all the files
-		for(int i = 0; i < contentHeight-1; i++){
-			int fileOffset = i + fileScroll; //std::max(fileSelected-(contentHeight-1),0);
-			if(fileSelected-fileScroll < 0){
-				fileScroll -= 1;
-			}
-			if(fileSelected-fileScroll >= contentHeight-1){
-				fileScroll += 1;
-			}
-
-			if(fileOffset >= folderContentNames.size()){
-				break;
-			}
-			videoDriver.writeStrW(folderContentNames[fileOffset], menuX + 2, menuY+i+1, 8);
-			// Test if it's a directory
-			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::Directory){
-				videoDriver.writeStr("<DIR>", menuX + menuWidth-18, menuY+i+1);
-			}else
-			// Check if it's an executable
-			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::EXE){
-				videoDriver.writeStr("[EXE]", menuX + menuWidth-18, menuY+i+1);
-			}else
-			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::ELF){
-				videoDriver.writeStr("[ELF]", menuX + menuWidth-18, menuY+i+1);
-			}else
-			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::Symbolic){
-				videoDriver.writeStr("<SYM>", menuX + menuWidth-18, menuY+i+1);
-			}else
-			if(folderFileTypes[fileOffset] == CU::EXEFileTypes::Broken){
-				videoDriver.writeStr("[???]", menuX + menuWidth-18, menuY+i+1);
-			}
-			
-			videoDriver.writeStr(folderFileTimes[fileOffset].second, menuX + menuWidth-4-(folderFileTimes[fileOffset].second.length()), menuY+i+1);
-			
-			if(fileSelected == fileOffset){
-				videoDriver.writeStr("[",menuX+1,menuY+i+1);
-				videoDriver.writeStr("]",menuX+menuWidth-3,menuY+i+1);
-			}
-		}
-
-		// Draw a scroll bar
-		int filescale = std::max((int)folderContents.size()-contentHeight,1);
-		float scrollBarScale = 1.0f / (float)(filescale);
-		int scrollBarHeight = contentHeight*scrollBarScale;
-		if(scrollBarHeight < 1){
-			scrollBarHeight = 1;
-		}
-		for(int i = 0; i < contentHeight-1; i++){
-			if(scrollBarHeight){
-				videoDriver.writeStr("#",menuX+menuWidth-2,menuY+i+1);
-				scrollBarHeight -= 1;
-			}else{
-				videoDriver.writeStr(":",menuX+menuWidth-2,menuY+i+1);
-			}
-		}
-
-		std::filesystem::file_status file_status = status(folderContents[fileSelected].path());
-
-		// Write some text
-		videoDriver.writeStrW("Save: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
-
-		videoDriver.writeStr("Last modified:"+folderFileTimes[fileSelected].first+" "+folderFileTimes[fileSelected].second, menuX + 1, menuY + menuHeight-2);
-
-		CU::keyCode key = videoDriver.getkey();
-
-		if(key == CU::keyCode::k_escape){
-			dialogOpen = false;
-			// Reset the directory
-			filesystemErrorCode.clear();
-			std::filesystem::current_path(originalPath,filesystemErrorCode); //set the path
-		}
-		if(key == CU::keyCode::k_tab){
-		}
-		if(key == CU::keyCode::s_up){
-			fileSelected -= 1;
-			if(fileSelected < 0){ fileSelected = 0; }
-		}
-		if(key == CU::keyCode::s_down){
-			fileSelected += 1;
-			if(fileSelected >= folderContents.size()) { fileSelected = folderContents.size()-1; }
-		}
-
-		if(key == CU::keyCode::k_enter){
-			// If it's a directory, enter it
-			if(folderContents[fileSelected].is_directory()){
-//				CU::debugWrite("Entering:"+std::string(folderContents[fileSelected].path()));
-				loadDirectory(std::string(folderContents[fileSelected].path()));
-			}else{
-				// Open the file if we can
-				if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
-					ErrorMsgBox("File not accessible!");
-				}else{
-					dialogOpen = false;
-					CU::FileMode fmode = CU::FileMode::READ_ONLY;
-					if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
-						fmode = CU::FileMode::READ_WRITE;
-					}
-					//folderContents[fileSelected].path()
-					CU::ErrorCode fecode = fileList[fileTabSelected].save("dummy.txt",fmode);
-					if(fecode==CU::ErrorCode::OPEN){
-						ErrorMsgBox("Failed to open!"); 
-						fileList.pop_back();
-					}else if(fecode==CU::ErrorCode::WRITE){
-						ErrorMsgBox("Writing Error!"); 
-						fileList.pop_back();
-					}else if(fecode==CU::ErrorCode::LARGE){
-						ErrorMsgBox("File too large!"); 
-						fileList.pop_back();
-					}else {
-						fpath = folderContents[fileTabSelected].path();
-					}
-				}
-			}
-		}
-
-		// Handle the user breaking the program
-		handleInt();
-
-		videoDriver.clearHalt();
-
-		videoDriver.flush();
-		//videoDriver.updateDriver();
-	}
-	return fpath;
+	return openFileDialog("Save File",CU::FileAccess::WRITE);
 };
 
 void CUEditor::closeCurrentFile(){
