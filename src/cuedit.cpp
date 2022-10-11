@@ -640,8 +640,11 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		if(scrollBarHeight < 1){
 			scrollBarHeight = 1;
 		}
+
+		int fsy = fileScroll;
+
 		for(int i = 0; i < contentHeight-1; i++){
-			if(scrollBarHeight){
+			if(scrollBarHeight && i >= fsy){
 				videoDriver.writeStr("#",menuX+menuWidth-2,menuY+i+1);
 				scrollBarHeight -= 1;
 			}else{
