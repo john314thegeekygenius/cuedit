@@ -112,6 +112,10 @@ CU::ErrorCode CU::File::save(std::string s_path, FileMode o_mode){
 		hasBeenSaved = true;
 
 		CU::debugWrite("Saved file to: "+s_path);
+
+		// TODO:
+		// Make this save a history file like vim?
+
 		return CU::ErrorCode::NONE;
 	}else{
 		return CU::ErrorCode::OPEN;

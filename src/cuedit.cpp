@@ -63,14 +63,14 @@ int MMS_FSaveAs(){
 	return 0;
 };
 
+int MMS_FReload(){
+	editor.reloadCurrentFile();
+	return 0;
+};
 
 int MMS_FClose(){
 	// Close the current file
 	editor.closeCurrentFile();
-	return 0;
-};
-
-int MMS_POpen(){
 	return 0;
 };
 
@@ -85,7 +85,7 @@ std::vector<CUSubMenu_t> MM_LFile = {
 	{"Open", &MMS_FOpen}, 
 	{"Save", &MMS_FSave}, 
 	{"Save As", &MMS_FSaveAs}, 
-	{"Reload", &CUMenuFNULL}, 
+	{"Reload", &MMS_FReload}, 
 	{"Close", &MMS_FClose}, 
 	{"Exit", &MMS_FExit},
 };
@@ -108,6 +108,11 @@ CUMenu_t MM_Sub_Edit = {
 
 CUMenu_t MM_Sub_Settings = {
 	"Settings", {},
+};
+
+
+int MMS_POpen(){
+	return 0;
 };
 
 std::vector<CUSubMenu_t> MM_LProject = {
@@ -197,8 +202,6 @@ void CUEditor::run(){
 			CU::keyCode key = videoDriver.getkey();
 
 			if(key == CU::keyCode::k_escape){
-				// TODO:
-				// Check for cases where this would not work
 				MainMenuTabsSelected = !MainMenuTabsSelected;
 				if(MainMenuTabsSelected){
 					mainMenu.selectTab(0);
@@ -507,12 +510,9 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		}else{
 			std::filesystem::current_path(originalPath,filesystemErrorCode); //set the path
 		}
-
-		// TODO:
-		// Add error handleing
+		// Warn the user
 		if(filesystemErrorCode.value()){
 			ErrorMsgBox(filesystemErrorCode.message());
-//			CU::debugWrite(filesystemErrorCode.message(),CU::DebugMsgType::ERROR);
 		}
 		
 		// Reset the folder path
@@ -877,6 +877,39 @@ std::string CUEditor::saveFile(bool overwrite){
 		}
 	}
 	return openFileDialog("Save File",CU::FileAccess::WRITE);
+};
+
+void CUEditor::reloadCurrentFile(){
+	if(!fileList.size()) { return ; }
+	// If we didn't open it as a file, WE CAN'T RELOAD IT!
+	if(!fileList[fileTabSelected].hasBeenSaved){
+		return;
+	}
+	// If we haven't saved, ask!
+	if(fileList[fileTabSelected].modified){
+		// Ask if the user wants to save the file
+		if(!AreYouSure("Reload without saving?")){
+			// If so, Save the file
+			if(saveFile(true).length() == 0){
+				return;
+			}
+		}
+	}
+
+	CU::FileMode fmode = CU::FileMode::READ_WRITE;
+	CU::ErrorCode fecode = fileList[fileTabSelected].open(fileList[fileTabSelected].getPath(),fmode);
+	if(fecode==CU::ErrorCode::OPEN){
+		ErrorMsgBox("Failed to open!"); 
+		fileList.pop_back();
+	}else if(fecode==CU::ErrorCode::READ){
+		ErrorMsgBox("Reading Error!"); 
+		fileList.pop_back();
+	}else if(fecode==CU::ErrorCode::LARGE){
+		ErrorMsgBox("File too large!"); 
+		fileList.pop_back();
+	}
+	return;
+
 };
 
 void CUEditor::loadArgFiles(int argc, char *argv[]){
@@ -1476,9 +1509,8 @@ void CUEditor::drawEditor(){
 void CUEditor::handleInt(){
 	switch((CUBreakType)videoDriver.halted()){
 		case CUBreakType::SAVE_EXIT:
-			// TODO:
-			// Save the project
-			running = false;
+			// Save the project and exit
+			shutdown();
 		break;
 		case CUBreakType::COPY:
 			// TODO:

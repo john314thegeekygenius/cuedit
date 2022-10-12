@@ -6,10 +6,38 @@ INFO:Raw bytes:1
 INFO:Raw:27
 INFO:Raw bytes:1
 INFO:Raw:10
-INFO:Raw bytes:3
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:1
+INFO:Raw:102
+INFO:Raw bytes:1
+INFO:Raw:100
+INFO:Raw bytes:1
+INFO:Raw:10
+INFO:Raw bytes:1
+INFO:Raw:114
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:1
+INFO:Raw:100
+INFO:Raw bytes:1
+INFO:Raw:106
+INFO:Raw bytes:1
+INFO:Raw:105
+INFO:Raw bytes:1
+INFO:Raw:107
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:1
+INFO:Raw:100
+INFO:Raw bytes:1
+INFO:Raw:102
+INFO:Raw bytes:1
+INFO:Raw:106
+INFO:Raw bytes:1
+INFO:Raw:59
+INFO:Raw bytes:1
 INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
 INFO:Raw bytes:1
 INFO:Raw:10
 INFO:Raw bytes:3
@@ -28,36 +56,12 @@ INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
 INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
 INFO:Raw bytes:1
 INFO:Raw:10
-INFO:Raw bytes:3
+INFO:Raw bytes:1
 INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
+INFO:Raw bytes:1
+INFO:Raw:10
 INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
@@ -80,6 +84,14 @@ INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
 INFO:Raw:66
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:66
+INFO:Raw bytes:1
+INFO:Raw:27
+INFO:Raw bytes:1
+INFO:Raw:27
 INFO:Raw bytes:1
 INFO:Raw:10
 INFO:Raw bytes:3
@@ -90,652 +102,6 @@ INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
 INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:65
-INFO:Raw bytes:1
-INFO:Raw:10
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:1
-INFO:Raw:27
-INFO:Raw bytes:1
-INFO:Raw:10
 INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
@@ -779,3 +145,9 @@ INFO:Raw:66
 INFO:Raw bytes:1
 INFO:Raw:10
 INFO:Quiting Program
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:1
+INFO:Raw:10

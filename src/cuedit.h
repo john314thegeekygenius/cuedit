@@ -79,6 +79,7 @@ public:
 	void shutdown();
 
 	void createFile();
+	void reloadCurrentFile();
 	void loadArgFiles(int argc, char *argv[]);
 
 	std::string openFileDialog(std::string name, CU::FileAccess access_type);
