@@ -81,6 +81,7 @@ enum class BlockChar{
 	DARK_SHADE = 0x8025,
 };
 
+const int UNIBlockCount = 0x26;
 
 const std::string UNIBlockChars [] = {
 	// Single lines
@@ -211,6 +212,8 @@ std::string trimString(std::string s, int w);
 std::string fileizeString(std::string s, int fnw, int exw);
 
 std::string filenameString(std::string s);
+
+std::string safeifyString(std::string s);
 
 void Clamp(int &x, int &y, int &w, int &h, int minx, int miny, int maxw, int maxh);
 

@@ -246,9 +246,16 @@ void CU::Driver::flush(){
 
 			int C = scrBuffer[(y*scrWidth) + x];
 			if(C & 0x8000){
-				buffer_string += CU::UNIBlockChars[C&0xFF];
+				if((C&0xFF) < UNIBlockCount){
+					buffer_string += CU::UNIBlockChars[C&0xFF];
+				}else{
+					buffer_string += '?';
+				}
 			}else{
-				buffer_string += (char)(C?C:' ');
+				if(C >= 32 && C <= 126)
+					buffer_string += (char)(C?C:' ');
+				else
+					buffer_string += '?';
 			}
 		}
 	}
@@ -454,6 +461,7 @@ void CU::Driver::writeStr(std::string s, int x,int y){
 	y *= scrWidth;
 	for(char c : s){
 		if(x < 0) { continue; }
+		if(c < 32 || c > 126) c = '?';
 		scrBuffer[(y) + x] = (int)c;
 		x++;
 		if(x > scrWidth){
@@ -468,6 +476,7 @@ void CU::Driver::writeStr(std::string s, int x,int y, CU::Color fg, CU::Color bg
 	y *= scrWidth;
 	for(char c : s){
 		if(x < 0) { continue; }
+		if(c < 32 || c > 126) c = '?';
 		scrBuffer[(y) + x] = (int)c;
 		scrBuffer[scrSize+(y) + x] = (((int)fg)<<8) | (int)bg;
 		x++;
@@ -739,11 +748,26 @@ std::string CU::filenameString(std::string s){
 		} 
 	}
 	for(int i = fnameBegin; i < s.length(); i++){
-		short_str.push_back(s.at(i));
+		if(s.at(i) >= 32 && s.at(i) <= 126){
+			short_str.push_back(s.at(i));
+		}else{
+			short_str.push_back('?');
+		}
 	}
 	return short_str;
 };
 
+std::string CU::safeifyString(std::string s){
+	std::string short_str = "";
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i) >= 32 && s.at(i) <= 126){
+			short_str.push_back(s.at(i));
+		}else{
+			short_str.push_back('?');
+		}
+	}
+	return short_str;
+};
 
 
 std::ofstream debugFile;

@@ -341,10 +341,16 @@ void CUEditor::drawGUI(){
 void CUEditor::loadSettings(){
 	// Reset the settings
 	settings.init();
-	
+
+	// Get the executable location
+	std::string exe_location = std::filesystem::canonical(std::filesystem::path("/proc/self/exe"));
+	exe_location = std::filesystem::path(exe_location).parent_path();
+
+	CU::debugWrite("Execuatble Location:"+exe_location);
+
 	// Read the settings file if available
 	std::ifstream settingsFile;
-	settingsFile.open(CU_SETTINGS_FILE_NAME);
+	settingsFile.open(exe_location+"/"+CU_SETTINGS_FILE_NAME);
 	
 	if(settingsFile.is_open()){
 		
@@ -554,6 +560,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		for (const auto & entry : std::filesystem::directory_iterator(folderPath)){
 			folderContents.push_back(entry);
 			folderContentNames.push_back(entry.path().filename());
+			//CU::debugWrite(entry.path().c_str());
 			
 			filesystemErrorCode.clear();
 			std::filesystem::file_time_type ftime = entry.last_write_time(filesystemErrorCode);
@@ -706,13 +713,16 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		std::filesystem::file_status folder_status = status(folderContents[fileSelected].path().parent_path());
 
 		if(access_type == CU::FileAccess::READ){
-			if( (file_status.permissions() & std::filesystem::perms::group_read) != std::filesystem::perms::none){
+			if(access(folderContents[fileSelected].path().c_str(), R_OK) == 0){
+//			if( (file_status.permissions() & std::filesystem::perms::owner_read) != std::filesystem::perms::none){
 				permissionString += "Read ";
 			}
-			if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
+			if(access(folderContents[fileSelected].path().c_str(), W_OK) == 0){
+//			if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
 				permissionString += "Write ";
 			}
-			if( (file_status.permissions() & std::filesystem::perms::group_exec) != std::filesystem::perms::none){
+			if(access(folderContents[fileSelected].path().c_str(), X_OK) == 0){
+//			if( (file_status.permissions() & std::filesystem::perms::group_exec) != std::filesystem::perms::none){
 				permissionString += "Execute";
 			}
 
