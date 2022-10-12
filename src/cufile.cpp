@@ -96,7 +96,6 @@ CU::ErrorCode CU::File::save(std::string s_path, FileMode o_mode){
 	if(f_stream.is_open()){
 		if(data.size()){
 			f_stream.write(data.data(),data.size());
-			CU::debugWrite(std::string(data.data()));
 			if(f_stream.bad()||f_stream.fail()){
 				f_stream.close();
 				return CU::ErrorCode::WRITE;
@@ -110,7 +109,9 @@ CU::ErrorCode CU::File::save(std::string s_path, FileMode o_mode){
 		// Nothing has been changed since the last save
 		modified = false;
 		// We just saved the file
-		hasBeenSaved = false;
+		hasBeenSaved = true;
+
+		CU::debugWrite("Saved file to: "+s_path);
 		return CU::ErrorCode::NONE;
 	}else{
 		return CU::ErrorCode::OPEN;

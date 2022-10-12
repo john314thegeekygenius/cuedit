@@ -43,6 +43,7 @@ private:
 	CU::Driver videoDriver;
 	CUSettings settings;
 	bool running = false;
+	bool shuttingDown = false;
 	
 	std::vector<CUMenu> menuList;
 	std::vector<CU::File> fileList;
@@ -73,7 +74,7 @@ public:
 	void drawGUI();
 	void fixCursor();
 	void doEditor(CU::keyCode key);
-	void closeCurrentFile();
+	bool closeCurrentFile();
 	void drawEditor();
 	void shutdown();
 
@@ -82,8 +83,10 @@ public:
 
 	std::string openFileDialog(std::string name, CU::FileAccess access_type);
 	std::string openFile();
-	std::string saveFile();
+	std::string saveFile(bool overwrite);
 	void ErrorMsgBox(std::string error);
+	bool AreYouSure(std::string warning);
+	std::string getUserString(std::string msg, int maxLength = -1);
 
 };
 

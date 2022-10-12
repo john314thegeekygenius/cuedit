@@ -54,17 +54,17 @@ int MMS_FNew(){
 };
 
 int MMS_FSave(){
-	editor.saveFile();
+	editor.saveFile(true);
+	return 0;
+};
+
+int MMS_FSaveAs(){
+	editor.saveFile(false);
 	return 0;
 };
 
 
 int MMS_FClose(){
-	// TODO:
-	// Check if the file is modified
-	// Ask if the user wants to save the file
-	// If so, Save the file
-
 	// Close the current file
 	editor.closeCurrentFile();
 	return 0;
@@ -84,7 +84,7 @@ std::vector<CUSubMenu_t> MM_LFile = {
 	{"New", &MMS_FNew}, 
 	{"Open", &MMS_FOpen}, 
 	{"Save", &MMS_FSave}, 
-	{"Save As", &CUMenuFNULL}, 
+	{"Save As", &MMS_FSaveAs}, 
 	{"Reload", &CUMenuFNULL}, 
 	{"Close", &MMS_FClose}, 
 	{"Exit", &MMS_FExit},
@@ -147,6 +147,8 @@ void CUEditor::init(){
 	EditorOpen = false;
 	TerminalOpen = false;
 
+	shuttingDown = false;
+
 	clipboard.clear();
 
 	loadSettings();
@@ -171,7 +173,8 @@ void CUEditor::init(){
 };
 
 void CUEditor::close(){
-	running = false;
+	shuttingDown = true;
+	fileTabSelected = 0;
 };
 
 void CUEditor::run(){
@@ -180,69 +183,80 @@ void CUEditor::run(){
 	while(running){
 		
 		drawGUI();
-
-		CU::keyCode key = videoDriver.getkey();
-
-		if(key == CU::keyCode::k_escape){
-			// TODO:
-			// Check for cases where this would not work
-			MainMenuTabsSelected = !MainMenuTabsSelected;
-			if(MainMenuTabsSelected){
-				mainMenu.selectTab(0);
+		if(shuttingDown){
+			// Close all the files
+			if(fileList.size()){
+				if(closeCurrentFile() == false){
+					shuttingDown = false;
+				}
 			}else{
-				mainMenu.closeTab(mainMenu.getTab());
-				mainMenu.selectTab(-1);
-			}
-		}
-
-		if(MainMenuTabsSelected){
-			if(key == CU::keyCode::s_left){
-				mainMenu.closeTab(mainMenu.getTab());
-				int cur = mainMenu.getTab() - 1;
-				if(cur < 0) { cur = 0; }
-				mainMenu.selectTab(cur);
-			}
-			if(key == CU::keyCode::s_right){
-				mainMenu.closeTab(mainMenu.getTab());
-				int cur = mainMenu.getTab() + 1;
-				if(cur >= mainMenu.numTabs()) { cur = mainMenu.numTabs()-1; }
-				mainMenu.selectTab(cur);
-			}
-			if(key == CU::keyCode::k_tab){
-				mainMenu.closeTab(mainMenu.getTab());
-				int cur = mainMenu.getTab() + 1;
-				if(cur >= mainMenu.numTabs()) { cur = 0; }
-				mainMenu.selectTab(cur);
-			}
-			if(key == CU::keyCode::k_enter){
-				if(mainMenu.tabOpen(mainMenu.getTab())){
-					// Run the sub function for that menu
-					mainMenu.runSubMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab()));
-					// Close the tab
-					mainMenu.closeTab(mainMenu.getTab());
-					// We don't want to still be on the main menu tabs
-					MainMenuTabsSelected = false;
-					mainMenu.selectTab(-1);
-				}else{
-					mainMenu.openTab(mainMenu.getTab());
-				}
-			}
-			if(key == CU::keyCode::s_up){
-				if(mainMenu.tabOpen(mainMenu.getTab())){
-					mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())-1);
-				}
-			}
-			if(key == CU::keyCode::s_down){
-				if(mainMenu.tabOpen(mainMenu.getTab())){
-					mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())+1);
-				}
+				running = false;
 			}
 		}else{
-			if(EditorSelected){
-				doEditor(key);
-			}else if(TerminalSelected){
+
+			CU::keyCode key = videoDriver.getkey();
+
+			if(key == CU::keyCode::k_escape){
 				// TODO:
-				// Add terminal
+				// Check for cases where this would not work
+				MainMenuTabsSelected = !MainMenuTabsSelected;
+				if(MainMenuTabsSelected){
+					mainMenu.selectTab(0);
+				}else{
+					mainMenu.closeTab(mainMenu.getTab());
+					mainMenu.selectTab(-1);
+				}
+			}
+
+			if(MainMenuTabsSelected){
+				if(key == CU::keyCode::s_left){
+					mainMenu.closeTab(mainMenu.getTab());
+					int cur = mainMenu.getTab() - 1;
+					if(cur < 0) { cur = 0; }
+					mainMenu.selectTab(cur);
+				}
+				if(key == CU::keyCode::s_right){
+					mainMenu.closeTab(mainMenu.getTab());
+					int cur = mainMenu.getTab() + 1;
+					if(cur >= mainMenu.numTabs()) { cur = mainMenu.numTabs()-1; }
+					mainMenu.selectTab(cur);
+				}
+				if(key == CU::keyCode::k_tab){
+					mainMenu.closeTab(mainMenu.getTab());
+					int cur = mainMenu.getTab() + 1;
+					if(cur >= mainMenu.numTabs()) { cur = 0; }
+					mainMenu.selectTab(cur);
+				}
+				if(key == CU::keyCode::k_enter){
+					if(mainMenu.tabOpen(mainMenu.getTab())){
+						// Run the sub function for that menu
+						mainMenu.runSubMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab()));
+						// Close the tab
+						mainMenu.closeTab(mainMenu.getTab());
+						// We don't want to still be on the main menu tabs
+						MainMenuTabsSelected = false;
+						mainMenu.selectTab(-1);
+					}else{
+						mainMenu.openTab(mainMenu.getTab());
+					}
+				}
+				if(key == CU::keyCode::s_up){
+					if(mainMenu.tabOpen(mainMenu.getTab())){
+						mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())-1);
+					}
+				}
+				if(key == CU::keyCode::s_down){
+					if(mainMenu.tabOpen(mainMenu.getTab())){
+						mainMenu.selectMenu(mainMenu.getTab(), mainMenu.curSubMenu(mainMenu.getTab())+1);
+					}
+				}
+			}else{
+				if(EditorSelected){
+					doEditor(key);
+				}else if(TerminalSelected){
+					// TODO:
+					// Add terminal
+				}
 			}
 		}
 
@@ -474,6 +488,8 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		folderFileTimes.push_back({"1/1/1900", "0:0:0"});
 	};
 
+	int folderMaxScroll = 0;
+
 	auto loadDirectory = [&](std::string c_path) {
 		filesystemErrorCode.clear();
 		if(c_path.length()){
@@ -575,11 +591,26 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 			}
 			//CU::debugWrite(std::string(entry.path().filename())+"   "+timeString);
 		}
+
+
+		int fcount = 0;
+		// Reset this
+		folderMaxScroll = 0;
+		// Count the number of scrolls
+		while(fcount < folderContents.size()){
+			if((fcount - folderMaxScroll) >= contentHeight-1){
+				folderMaxScroll += 1;
+			}
+			fcount ++;
+		}
+
 	};
 
 	loadDirectory("");
 
 	bool fileSelectSelected = true;
+
+	std::string WriteFileName = "dummy.txt";
 
 	while(dialogOpen){
 		// Draw the window
@@ -596,12 +627,6 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		// Write all the files
 		for(int i = 0; i < contentHeight-1; i++){
 			int fileOffset = i + fileScroll; //std::max(fileSelected-(contentHeight-1),0);
-			if(fileSelected-fileScroll < 0){
-				fileScroll -= 1;
-			}
-			if(fileSelected-fileScroll >= contentHeight-1){
-				fileScroll += 1;
-			}
 
 			if(fileOffset >= folderContentNames.size()){
 				break;
@@ -634,14 +659,22 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		}
 
 		// Draw a scroll bar
-		int filescale = std::max((int)folderContents.size()-contentHeight,1);
-		float scrollBarScale = 1.0f / (float)(filescale);
-		int scrollBarHeight = contentHeight*scrollBarScale;
+		float scrollBarScale = (float)contentHeight / (float)folderContents.size();//std::max((int)folderContents.size()-contentHeight,1);
+		int scrollBarHeight = round(contentHeight*scrollBarScale)-2;
+
 		if(scrollBarHeight < 1){
 			scrollBarHeight = 1;
 		}
+		if(scrollBarHeight >= contentHeight){
+			scrollBarHeight = contentHeight-1;
+		}
 
-		int fsy = fileScroll;
+		int fsy = round((float)fileScroll * ( scrollBarScale));
+		
+		// Force the position to be lower (because of oddly numbered folder content)
+		if(fileScroll == folderMaxScroll && scrollBarHeight==2){
+			fsy += 1;
+		}
 
 		for(int i = 0; i < contentHeight-1; i++){
 			if(scrollBarHeight && i >= fsy){
@@ -652,9 +685,10 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 			}
 		}
 
+
 		// Write some text
 		// std::string(folderContents[fileSelected].path().filename())
-		std::string WriteFileName = "dummy.txt";
+		
 		if(access_type == CU::FileAccess::READ){
 			videoDriver.writeStrW("Open: "+std::string(folderContents[fileSelected].path().filename()), menuX + 1, menuY + menuHeight-4,30);
 		}else{
@@ -698,6 +732,11 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 		if(key == CU::keyCode::k_tab){
 			fileSelectSelected = !fileSelectSelected;
 		}
+		if(access_type == CU::FileAccess::WRITE){
+			if(key == CU::keyCode::k_space){
+				WriteFileName = getUserString("Enter filename to save to");
+			}
+		}
 		if(fileSelectSelected){
 			if(key == CU::keyCode::s_up){
 				fileSelected -= 1;
@@ -706,6 +745,13 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 			if(key == CU::keyCode::s_down){
 				fileSelected += 1;
 				if(fileSelected >= folderContents.size()) { fileSelected = folderContents.size()-1; }
+			}
+
+			if(fileSelected-fileScroll < 0){
+				fileScroll -= 1;
+			}
+			if(fileSelected-fileScroll >= contentHeight-1){
+				fileScroll += 1;
 			}
 		}
 
@@ -745,27 +791,40 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 							}
 						}
 					}
+					else if(access_type == CU::FileAccess::WRITE){
+						WriteFileName = folderContents[fileSelected].path().filename();
+					}
 				}
 			}else{
 				if(access_type == CU::FileAccess::WRITE){
 //						if( (folder_status.permissions() & std::filesystem::perms::group_write) == std::filesystem::perms::none){
 //							ErrorMsgBox("Cannot write to directory");
 //						}else{
-					// Write the file
-					dialogOpen = false;
-					CU::FileMode fmode = CU::FileMode::READ_WRITE;
-					CU::ErrorCode fecode = fileList[fileTabSelected].save(WriteFileName,fmode);
-					if(fecode==CU::ErrorCode::OPEN){
-						ErrorMsgBox("Failed to open!"); 
-						fileList.pop_back();
-					}else if(fecode==CU::ErrorCode::WRITE){
-						ErrorMsgBox("Writing Error!"); 
-						fileList.pop_back();
-					}else if(fecode==CU::ErrorCode::LARGE){
-						ErrorMsgBox("File too large!"); 
-						fileList.pop_back();
-					}else {
-						fpath = folderContents[fileTabSelected].path();
+					// Make sure the user wants to overwrite the file if same name
+					bool canWriteFile = true;
+					for(int i = 0; i < folderContents.size(); i++){
+						if(WriteFileName == folderContents[i].path().filename()){
+							// Uh oh!
+							canWriteFile = AreYouSure("Overwrite that file?");
+						}
+					}
+					if(canWriteFile){
+						// Write the file
+						dialogOpen = false;
+						CU::FileMode fmode = CU::FileMode::READ_WRITE;
+						CU::ErrorCode fecode = fileList[fileTabSelected].save(std::string(folderPath.c_str()) + "/" + WriteFileName,fmode);
+						if(fecode==CU::ErrorCode::OPEN){
+							ErrorMsgBox("Failed to open!"); 
+							fileList.pop_back();
+						}else if(fecode==CU::ErrorCode::WRITE){
+							ErrorMsgBox("Writing Error!"); 
+							fileList.pop_back();
+						}else if(fecode==CU::ErrorCode::LARGE){
+							ErrorMsgBox("File too large!"); 
+							fileList.pop_back();
+						}else {
+							fpath = folderContents[fileTabSelected].path();
+						}
 					}
 				}
 			}
@@ -784,12 +843,29 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 };
 
 std::string CUEditor::openFile(){
-
 	return openFileDialog("Open File",CU::FileAccess::READ);
 };
 
-std::string CUEditor::saveFile(){
-
+std::string CUEditor::saveFile(bool overwrite){
+	if(!fileList.size()) { return ""; }
+	if(overwrite){
+		// If we already saved, just overwrite it!
+		if(fileList[fileTabSelected].hasBeenSaved){
+			CU::FileMode fmode = CU::FileMode::READ_WRITE;
+			CU::ErrorCode fecode = fileList[fileTabSelected].save(fileList[fileTabSelected].getPath(),fmode);
+			if(fecode==CU::ErrorCode::OPEN){
+				ErrorMsgBox("Failed to open!"); 
+				fileList.pop_back();
+			}else if(fecode==CU::ErrorCode::WRITE){
+				ErrorMsgBox("Writing Error!"); 
+				fileList.pop_back();
+			}else if(fecode==CU::ErrorCode::LARGE){
+				ErrorMsgBox("File too large!"); 
+				fileList.pop_back();
+			}
+			return fileList[fileTabSelected].getPath();
+		}
+	}
 	return openFileDialog("Save File",CU::FileAccess::WRITE);
 };
 
@@ -805,7 +881,18 @@ void CUEditor::loadArgFiles(int argc, char *argv[]){
 	}
 };
 
-void CUEditor::closeCurrentFile(){
+bool CUEditor::closeCurrentFile(){
+	// Check if the file is modified
+	if(!fileList[fileTabSelected].hasBeenSaved || fileList[fileTabSelected].modified){
+		// Ask if the user wants to save the file
+		if(!AreYouSure("Close without saving?")){
+			// If so, Save the file
+			if(saveFile(true).length() == 0){
+				return false;
+			}
+		}
+	}
+
 	fileList.erase(fileList.begin()+fileTabSelected);
 	fileInfo.erase(fileInfo.begin()+fileTabSelected);
 	fileTabSelected += 1;
@@ -820,6 +907,7 @@ void CUEditor::closeCurrentFile(){
 		EditorSelected = false;
 		EditorOpen = false;
 	}
+	return true;
 };
 
 void CUEditor::ErrorMsgBox(std::string error){
@@ -854,6 +942,130 @@ void CUEditor::ErrorMsgBox(std::string error){
 		videoDriver.flush();
 		//videoDriver.updateDriver();
 	}
+};
+
+bool CUEditor::AreYouSure(std::string warning){
+	int menuWidth = 32;
+	int menuHeight = 8;
+	int menuX = (videoDriver.getWidth()>>1) - (menuWidth>>1);
+	int menuY = (videoDriver.getHeight()>>1) - (menuHeight>>1)+1;
+
+	bool returnValue = false;
+
+	bool userAck = false;
+
+	bool yesNoSelect = false;
+	while(!userAck){
+
+		CU::keyCode key = videoDriver.getkey();
+
+		if(key == CU::keyCode::k_escape){
+			userAck = true;
+			returnValue = false;
+		}
+		if(key == CU::keyCode::l_y){
+			userAck = true;
+			returnValue = true;
+		}
+		if(key == CU::keyCode::l_n){
+			userAck = true;
+			returnValue = false;
+		}
+		if(key == CU::keyCode::s_left){
+			yesNoSelect = false;
+		}
+		if(key == CU::keyCode::s_right){
+			yesNoSelect = true;
+		}
+		if(key == CU::keyCode::k_tab){
+			yesNoSelect = !yesNoSelect;
+		}
+		if(key == CU::keyCode::k_enter){
+			userAck = true;
+			returnValue = yesNoSelect;
+		}
+
+		// Draw a window
+
+		// Draw the background
+		videoDriver.drawBar(menuX,menuY,menuWidth,menuHeight, ' ', settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a feild
+		videoDriver.drawBox(menuX,menuY,menuWidth,menuHeight, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a title bar
+		videoDriver.drawBar(menuX,menuY,menuWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
+		videoDriver.writeStr("Are you sure?", menuX + (menuWidth>>1)-5, menuY);
+		std::string wmsg = "Are you sure you want to";
+		videoDriver.writeStr(wmsg, menuX + (menuWidth>>1)-(wmsg.length()>>1), menuY+(menuHeight>>1));
+		videoDriver.writeStr(warning, menuX + (menuWidth>>1)-(warning.length()>>1), menuY+(menuHeight>>1)+1);
+
+		if(yesNoSelect){
+			videoDriver.writeStr(" NO", menuX + 2, menuY+menuHeight-2);
+			videoDriver.writeStr("[YES]", menuX + (menuWidth)-6, menuY+menuHeight-2);
+		}else{
+			videoDriver.writeStr("[NO]", menuX + 2, menuY+menuHeight-2);
+			videoDriver.writeStr(" YES", menuX + (menuWidth)-6, menuY+menuHeight-2);
+		}
+		videoDriver.clearHalt();
+
+		videoDriver.flush();
+		//videoDriver.updateDriver();
+	}
+	return returnValue;
+};
+
+
+std::string CUEditor::getUserString(std::string msg,int maxLength){
+	int menuWidth = 32;
+	int menuHeight = 8;
+	int menuX = (videoDriver.getWidth()>>1) - (menuWidth>>1);
+	int menuY = (videoDriver.getHeight()>>1) - (menuHeight>>1)+1;
+
+	std::string outputString = "";
+
+	bool userAck = false;
+
+	while(!userAck){
+
+		CU::keyCode key = videoDriver.getkey();
+
+		if(key == CU::keyCode::k_escape){
+			userAck = true;
+		}
+		if(key == CU::keyCode::k_enter){
+			userAck = true;
+		}
+		if( (maxLength>0 && outputString.length() < maxLength) || maxLength == -1){
+			// Read characters
+			if( ((int)key >= (int)CU::keyCode::k_space) && ((int)key <= (int)CU::keyCode::k_grave) ){
+				outputString.push_back((char)key);
+			}
+			if(key == CU::keyCode::k_backspace){
+				outputString.pop_back();
+			}
+		}
+
+		// Draw a window
+
+		// Draw the background
+		videoDriver.drawBar(menuX,menuY,menuWidth,menuHeight, ' ', settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a feild
+		videoDriver.drawBox(menuX,menuY,menuWidth,menuHeight, CU::BlockType::SINGLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+		// Draw a title bar
+		videoDriver.drawBar(menuX,menuY,menuWidth, 1, ' ', settings.menu_bar_fg_color, settings.menu_bar_bg_color);
+		// Draw a text feild
+		videoDriver.drawBox(menuX+2,menuY+3,menuWidth-4,3, CU::BlockType::DOUBLE, settings.sub_menu_fg_color, settings.sub_menu_bg_color);
+
+		videoDriver.writeStr("Input Feild", menuX + (menuWidth>>1)-5, menuY);
+		videoDriver.writeStr(msg, menuX + (menuWidth>>1)-(msg.length()>>1), menuY+2);
+
+		videoDriver.writeStr(outputString, menuX + 3, menuY+4);
+
+		videoDriver.clearHalt();
+
+		videoDriver.flush();
+		//videoDriver.updateDriver();
+	}
+	return outputString;
 };
 
 void CUEditor::createFile(){
