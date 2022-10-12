@@ -22,7 +22,7 @@ void breakHandle(int e){
 
 int main(int argc, char *argv[]){
 	CU::openDebugFile();
-	editor.init();
+	editor.init(argc, argv);
 
 	// Make CUEdit open files from the arguments list
 	editor.loadArgFiles(argc, argv);
@@ -138,7 +138,7 @@ CUMenu_t MM_Sub_Help = {
 };
 
 
-void CUEditor::init(){
+void CUEditor::init(int argc, char *argv[]){
 	running = true;
 
 	// Setup the break handler
@@ -174,7 +174,22 @@ void CUEditor::init(){
 	mainMenu.addTab(MM_Sub_Settings);
 	mainMenu.addTab(MM_Sub_Project);
 	mainMenu.addTab(MM_Sub_Help);
-	
+
+	// Open any files in the arguments
+	for(int i = 1; i < argc; i++){
+		std::string path = editor.loadFile(argv[i]);
+		if(path.length()){
+			// We want to edit the file now
+			editor.EditorSelected = true;
+			editor.EditorOpen = true;
+		}else{
+			// Open a new file
+			editor.createFile(argv[i]);
+			// We want to edit the file now
+			editor.EditorSelected = true;
+			editor.EditorOpen = true;
+		}
+	}	
 };
 
 void CUEditor::close(){
@@ -774,31 +789,12 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 				}else{
 					// Open the file if we can
 					if(access_type == CU::FileAccess::READ){
-						if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
+						if(access(folderContents[fileSelected].path().c_str(), R_OK) != 0){
+						//if( (file_status.permissions() & std::filesystem::perms::group_read) == std::filesystem::perms::none){
 							ErrorMsgBox("File not accessible!");
 						}else{
 							dialogOpen = false;
-							fileList.emplace_back(CU::File());
-							CU::FileMode fmode = CU::FileMode::READ_ONLY;
-							if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
-								fmode = CU::FileMode::READ_WRITE;
-							}
-							CU::ErrorCode fecode = fileList.back().open(folderContents[fileSelected].path(),fmode);
-							if(fecode==CU::ErrorCode::OPEN){
-								ErrorMsgBox("Failed to open!"); 
-								fileList.pop_back();
-							}else if(fecode==CU::ErrorCode::READ){
-								ErrorMsgBox("Reading Error!"); 
-								fileList.pop_back();
-							}else if(fecode==CU::ErrorCode::LARGE){
-								ErrorMsgBox("File too large!"); 
-								fileList.pop_back();
-							}else {
-								fpath = folderContents[fileSelected].path();
-								fileTabSelected = fileList.size()-1;
-								CU::fileInfo finfo;
-								fileInfo.push_back(finfo);
-							}
+							loadFile(folderContents[fileSelected].path());
 						}
 					}
 					else if(access_type == CU::FileAccess::WRITE){
@@ -851,6 +847,33 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 
 	return fpath;
 };
+
+std::string CUEditor::loadFile(std::string load_path){
+	std::string fpath = "";
+	fileList.emplace_back(CU::File());
+	CU::FileMode fmode = CU::FileMode::READ_ONLY;
+	if(access(load_path.c_str(), W_OK) == 0){
+	//if( (file_status.permissions() & std::filesystem::perms::group_write) != std::filesystem::perms::none){
+		fmode = CU::FileMode::READ_WRITE;
+	}
+	CU::ErrorCode fecode = fileList.back().open(load_path,fmode);
+	if(fecode==CU::ErrorCode::OPEN){
+		ErrorMsgBox("Failed to open!"); 
+		fileList.pop_back();
+	}else if(fecode==CU::ErrorCode::READ){
+		ErrorMsgBox("Reading Error!"); 
+		fileList.pop_back();
+	}else if(fecode==CU::ErrorCode::LARGE){
+		ErrorMsgBox("File too large!"); 
+		fileList.pop_back();
+	}else {
+		fpath = load_path;
+		fileTabSelected = fileList.size()-1;
+		CU::fileInfo finfo;
+		fileInfo.push_back(finfo);
+	}
+	return fpath;
+}
 
 std::string CUEditor::openFile(){
 	return openFileDialog("Open File",CU::FileAccess::READ);
@@ -1111,19 +1134,19 @@ std::string CUEditor::getUserString(std::string msg,int maxLength){
 	return outputString;
 };
 
-void CUEditor::createFile(){
+void CUEditor::createFile(std::string name){
 	fileList.emplace_back(CU::File());
 	std::string fname = "";
 	int fileCount = 0;
 	for(int i = 0; i < fileList.size();  i ++){
-		if(fileList[i].getName().compare(0,8,"Untitled")==0){
+		if(fileList[i].getName().compare(0,8,name)==0){
 			fileCount += 1;
 		}
 	}
 	if(fileCount){
-		fname = "Untitled_"+std::to_string(fileCount);
+		fname = name+"_"+std::to_string(fileCount);
 	}else{
-		fname = "Untitled";
+		fname = name;
 	}
 	fileList.back().openNew(fname,CU::FileMode::READ_WRITE);
 	CU::fileInfo finfo;

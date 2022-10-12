@@ -65,7 +65,7 @@ public:
 	bool TerminalOpen = false;
 
 public:
-	void init();
+	void init(int argc, char *argv[]);
 	void loadSettings();
 	void halt(int e);
 	void run();
@@ -78,12 +78,13 @@ public:
 	void drawEditor();
 	void shutdown();
 
-	void createFile();
+	void createFile(std::string name = "Untitled");
 	void reloadCurrentFile();
 	void loadArgFiles(int argc, char *argv[]);
 
 	std::string openFileDialog(std::string name, CU::FileAccess access_type);
 	std::string openFile();
+	std::string loadFile(std::string load_path);
 	std::string saveFile(bool overwrite);
 	void ErrorMsgBox(std::string error);
 	bool AreYouSure(std::string warning);
