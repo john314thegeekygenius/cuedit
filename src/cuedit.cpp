@@ -177,7 +177,7 @@ void CUEditor::init(int argc, char *argv[]){
 
 	// Open any files in the arguments
 	for(int i = 1; i < argc; i++){
-		std::string path = editor.loadFile(argv[i]);
+		std::string path = editor.loadFile(argv[i], false);
 		if(path.length()){
 			// We want to edit the file now
 			editor.EditorSelected = true;
@@ -794,7 +794,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 							ErrorMsgBox("File not accessible!");
 						}else{
 							dialogOpen = false;
-							loadFile(folderContents[fileSelected].path());
+							fpath = loadFile(folderContents[fileSelected].path());
 						}
 					}
 					else if(access_type == CU::FileAccess::WRITE){
@@ -848,7 +848,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 	return fpath;
 };
 
-std::string CUEditor::loadFile(std::string load_path){
+std::string CUEditor::loadFile(std::string load_path, bool showError){
 	std::string fpath = "";
 	fileList.emplace_back(CU::File());
 	CU::FileMode fmode = CU::FileMode::READ_ONLY;
@@ -858,13 +858,16 @@ std::string CUEditor::loadFile(std::string load_path){
 	}
 	CU::ErrorCode fecode = fileList.back().open(load_path,fmode);
 	if(fecode==CU::ErrorCode::OPEN){
-		ErrorMsgBox("Failed to open!"); 
+		if(showError)
+			ErrorMsgBox("Failed to open!"); 
 		fileList.pop_back();
 	}else if(fecode==CU::ErrorCode::READ){
-		ErrorMsgBox("Reading Error!"); 
+		if(showError)
+			ErrorMsgBox("Reading Error!"); 
 		fileList.pop_back();
 	}else if(fecode==CU::ErrorCode::LARGE){
-		ErrorMsgBox("File too large!"); 
+		if(showError)
+			ErrorMsgBox("File too large!"); 
 		fileList.pop_back();
 	}else {
 		fpath = load_path;

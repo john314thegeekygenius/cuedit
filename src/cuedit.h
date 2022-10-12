@@ -84,7 +84,7 @@ public:
 
 	std::string openFileDialog(std::string name, CU::FileAccess access_type);
 	std::string openFile();
-	std::string loadFile(std::string load_path);
+	std::string loadFile(std::string load_path,bool showError = true);
 	std::string saveFile(bool overwrite);
 	void ErrorMsgBox(std::string error);
 	bool AreYouSure(std::string warning);
