@@ -201,8 +201,10 @@ void CUEditor::run(){
 	int cx = 0;
 	int cy = 0;
 	while(running){
-		
+		CU::Mouse_t termMouse = videoDriver.getMouse();
+
 		drawGUI();
+
 		if(shuttingDown){
 			// Close all the files
 			if(fileList.size()){
@@ -874,6 +876,18 @@ std::string CUEditor::loadFile(std::string load_path, bool showError){
 		fileTabSelected = fileList.size()-1;
 		CU::fileInfo finfo;
 		fileInfo.push_back(finfo);
+
+		std::vector<char> & data = fileList.back().getData();
+		for( int i = 0; i < data.size(); i++){
+			if(data[i] == 9){
+				// Replace all tabs with spaces! :O
+				data[i] = ' ';
+				for(int e = 0; e < settings.tabspacing-1; e++){
+					data.insert(data.begin()+i+e,' ');
+				}
+			}
+		}
+
 	}
 	return fpath;
 }
@@ -1303,6 +1317,18 @@ void CUEditor::doEditor(CU::keyCode key){
 		fileInfo[fileTabSelected].cursorMovedDir = 1;
 		fileList[fileTabSelected].modified = true;
 	}
+	if(key == CU::keyCode::k_tab){
+		// Write spaces to the file
+		std::vector<char> &filedata = fileList[fileTabSelected].getData();
+		for(int i = 0; i < settings.tabspacing; i ++){
+			filedata.insert(filedata.begin()+fileInfo[fileTabSelected].cursorOffset,' ');
+			// Move the cursor
+			fileInfo[fileTabSelected].cursorX += 1;
+		}
+		fileInfo[fileTabSelected].cursorMovedDir = 1;
+		fileList[fileTabSelected].modified = true;
+	}
+	
 	if(key == CU::keyCode::k_enter){
 		// Add a newline to the file
 		std::vector<char> &filedata = fileList[fileTabSelected].getData();

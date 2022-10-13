@@ -20,6 +20,10 @@ CU::Driver::Driver(){
 		// Yay!
 		colorSupported = true;
 	}
+
+	// Make sure the mouse is supported
+	terminalMouse.enabled = false;
+	//terminalMouse.enabled = true;
 	
 	// Disable keyboard delay
 	kbNoDelay();
@@ -32,6 +36,11 @@ CU::Driver::Driver(){
 
 	// Hide the "pysical" cursor
 	std::cout << "\x1B[?25l" << std::flush;
+
+	// Enable mouse tracking
+	if(terminalMouse.enabled){
+		std::cout << "\x1B[?1000;1003;1006;1015h" << std::flush;
+	}
 
 	// Bool to check if break happened
 	breakCalled = false;
@@ -63,6 +72,11 @@ void CU::Driver::shutdownDriver(){
 
 	// Show the "pysical" cursor
 	std::cout << "\x1B[?25h" << std::flush;
+
+	// Disable mouse tracking
+	if(terminalMouse.enabled){
+		std::cout << "\x1B[?1000;1003;1006;1015l" << std::flush;
+	}
 
 	// Reset the handler
     struct sigaction action;
@@ -224,6 +238,17 @@ void CU::Driver::flush(){
 	char screen_buffer[scrSize*20];
 	int buffer_offset = 0;
 	std::string buffer_string;
+
+	// Draw the mouse cursor overtop of everything
+	if(terminalMouse.enabled){
+		setCurPos(terminalMouse.blockX,terminalMouse.blockY);
+		if(terminalMouse.buttonMask != CU::MouseMask::NONE){
+			writeBChar(CU::BlockChar::MID_SHADE);
+		}else{
+			writeBChar(CU::BlockChar::SOLID);
+		}
+	}
+
 
 	for(int y = 0; y < scrHeight; y++){
 		for(int x = 0; x < scrWidth; x++){
@@ -566,21 +591,99 @@ void CU::Driver::kbNoDelay(){
 int CU::Driver::kbhit(void) {
     int nbbytes;
     ioctl(0, FIONREAD, &nbbytes);  // 0 is STDIN
-	if(nbbytes)
+	if(nbbytes){
 		debugWrite("Raw bytes:"+std::to_string(nbbytes));
+	}
     return nbbytes;
 };
 
 char CU::Driver::getch() {
 	char buf = 0;
-	read(0, &buf, 1);
-	debugWrite("Raw:"+std::to_string(buf));
+	if(ungetchbuffer.size()){
+		buf = ungetchbuffer.back();
+		ungetchbuffer.pop_back();
+	}else{
+		read(0, &buf, 1);
+		debugWrite("Raw:"+std::to_string(buf));
+	}
 	return (buf);
+};
+
+void CU::Driver::ungetch(char buf) {
+	ungetchbuffer.push_back(buf);
+};
+
+int CU::Driver::getMValue(){
+	char ch = 0;
+	int outValue = 0;
+	bool loadFlag = false;
+	std::string ostr = "";
+	for(int i = 0; i < 12; i++){
+		ch = getch();
+		if(ch == 59){
+			loadFlag = !loadFlag;
+		}
+		if(loadFlag==false || (ch == 77 || ch == 109)) {
+			ungetch(ch);
+			break; // end of value collection
+		}
+		if(ch != 59){
+			outValue *= 10;
+			outValue += (int)ch-48;
+		}
+	}
+	CU::debugWrite(std::to_string(outValue));
+	return outValue;
 };
 
 CU::keyCode CU::Driver::getkey() {
 	int key = (int)CU::keyCode::k_null;
 	int keyCount = kbhit();
+
+/*
+	https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+	https://stackoverflow.com/questions/5966903/how-to-get-mousemove-and-mouseclick-in-bash
+	https://stackoverflow.com/questions/44116977/get-mouse-position-in-pixels-using-escape-sequences
+
+	terminalMouse.blockX = 0;
+	terminalMouse.blockY = 0;
+
+	terminalMouse.clickX = 0;
+	terminalMouse.clickY = 0;
+	terminalMouse.buttonMask = CU::MouseMask::NONE;
+
+	Left click Down: 0;63;7M
+	Left click Up  : 0;50;6m
+
+	Middle click Down: 1;50;6M
+	Middle click Up  : 1;50;6m
+
+	Right click Down: 2;50;6M
+	Right click Up  : 2;50;6m
+
+	Scroll Up   : 64;53;9M
+	Scroll Down : 65;53;9M
+
+	MB - Mouse Button
+	X = x+49
+	Y = y+49
+	RT - Mouse Action  77 - Down,  109 - Up
+	left:
+		  ESC   MB     X    Y   RT
+	D: 27 91 60 48 59 49 59 49 77
+	R: 27 91 60 48 59 49 59 49 109
+	right
+	D: 27 91 60 50 59 49 59 49 77
+
+	SCID - scroll identifier
+
+			ESC     SCID    X     Y
+Scrl Up  :27 91 60 54 52 59 49 59 49 77 
+Scrl Dwn :27 91 60 54 53 59 49 59 49 77 
+
+				   ESC    MMID     X     Y 
+	Mouse Move: 27 91 60 51 53 59 49 59 49 77 
+*/
 
 	if(keyCount){
 		char ch = getch(); 
@@ -592,6 +695,61 @@ CU::keyCode CU::Driver::getkey() {
 				if(specialcheck == 0x5b){
 					if(keyCount>3){
 						specialcheck = getch();
+						if(specialcheck == 0x3c){
+							if(terminalMouse.enabled){
+								// Mouse events!
+								char idchk[2];
+								idchk[0] = getch();
+								idchk[1] = getch();
+
+								if(idchk[0] >= 48 && idchk[0] <= 50 && idchk[1]==59) {
+									ungetch(idchk[1]);
+									// Get the mouse position
+									terminalMouse.clickX = getMValue()-1;
+									terminalMouse.clickY = getMValue()-1;
+
+									terminalMouse.blockX = terminalMouse.clickX;
+									terminalMouse.blockY = terminalMouse.clickY;
+
+									if(idchk[0] == 48)
+										terminalMouse.buttonMask = CU::MouseMask::LBUTTON;
+									if(idchk[0] == 49)
+										terminalMouse.buttonMask = CU::MouseMask::MBUTTON;
+									if(idchk[0] == 50)
+										terminalMouse.buttonMask = CU::MouseMask::RBUTTON;
+									char mskchk = getch();
+									if(mskchk == 109){
+										int t = (int)terminalMouse.buttonMask;
+										t |= (int)CU::MouseMask::RELEASED;
+										terminalMouse.buttonMask = (CU::MouseMask)t;
+									}
+								}
+								if(idchk[0]==51) {
+									if(idchk[1]==53){
+	//									int t = (int)terminalMouse.buttonMask;
+	//									t |= (int)CU::MouseMask::DOWN;
+									}
+									// Get the mouse position
+									terminalMouse.blockX = getMValue()-1;
+									terminalMouse.blockY = getMValue()-1;
+								}
+								if(idchk[0]==54) {
+									if(idchk[1]==52){
+										// Mouse scrolled up
+										terminalMouse.scroll = -1;
+									}
+									if(idchk[1]==53){
+										// Mouse scrolled down
+										terminalMouse.scroll = 1;
+									}
+									// Get the mouse position
+									terminalMouse.blockX = getMValue()-1;
+									terminalMouse.blockY = getMValue()-1;
+								}
+								// Catch the mouse identifier
+								char mouseCatch = getch();
+							}
+						}else
 						if(specialcheck == 0x31){
 							specialcheck = getch();
 							if(specialcheck == 0x3b){
@@ -662,6 +820,21 @@ CU::keyCode CU::Driver::getkey() {
 		//CU::debugWrite("Key pressed "+std::to_string(ch));
 	}
 	return (CU::keyCode)key;
+};
+
+CU::Mouse_t CU::Driver::getMouse(){
+	CU::Mouse_t mcpy;
+	mcpy.blockX = terminalMouse.blockX;
+	mcpy.blockY = terminalMouse.blockY;
+	mcpy.clickX = terminalMouse.clickX;
+	mcpy.clickY = terminalMouse.clickY;
+	mcpy.buttonMask = terminalMouse.buttonMask;
+	mcpy.scroll = terminalMouse.scroll;
+	mcpy.enabled = terminalMouse.enabled;
+	// Clear the mouse
+	terminalMouse.buttonMask = CU::MouseMask::NONE;
+	terminalMouse.scroll = 0;
+	return mcpy;
 };
 
 int CU::stoi(std::string in_str){

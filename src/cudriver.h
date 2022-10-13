@@ -73,12 +73,12 @@ enum class BlockChar{
 	DHBAR = 0x8012,
 	DVBAR = 0x8013,
 	// Block Chars
-	SOLID = 0x8020,
-	BOT_HALF = 0x8021,
-	TOP_HALF = 0x8022,
-	LIGHT_SHADE = 0x8023,
-	MID_SHADE = 0x8024,
-	DARK_SHADE = 0x8025,
+	SOLID = 0x8014,
+	BOT_HALF = 0x8015,
+	TOP_HALF = 0x8016,
+	LIGHT_SHADE = 0x8017,
+	MID_SHADE = 0x8018,
+	DARK_SHADE = 0x8019,
 };
 
 const int UNIBlockCount = 0x26;
@@ -128,6 +128,26 @@ enum class DebugMsgType {
 	WARN = 2,
 };
 
+enum class MouseMask {
+	NONE = 0x0,
+	LBUTTON = 0x1,
+	MBUTTON = 0x2,
+	RBUTTON = 0x4,
+	RELEASED = 0x10,
+};
+
+typedef struct Mouse_t {
+	int blockX;
+	int blockY;
+
+	int clickX;
+	int clickY;
+
+	int scroll;
+	MouseMask buttonMask;
+
+	bool enabled;
+}Mouse_t;
 
 class Driver {
 private:
@@ -149,6 +169,10 @@ private:
 	int FPS = 0;
 	int targetFPS = 60;
 	int frameCount = 0;
+
+	Mouse_t terminalMouse;
+
+	std::vector<int> ungetchbuffer;
 
 public:
 	Driver();
@@ -174,6 +198,9 @@ public:
 	void enableColor();
 	void disableColor();
 
+	Mouse_t getMouse();
+	int getMValue();
+
 	void setCurPos(int x,int y);
 //	void hideCursor();
 //	void showCursor();
@@ -197,6 +224,7 @@ public:
 	void kbNoDelay();
 	int kbhit();
 	char getch();
+	void ungetch(char ch);
 	keyCode getkey();
 
 };

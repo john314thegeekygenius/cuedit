@@ -46,6 +46,8 @@ typedef struct CUSettings {
 	// -----------------
 	CUBreakType handleBreak;
 
+	int tabspacing;
+
 	void init(){
 		background_color = CU::Color::BLACK;
 		background_pattern = " ";
@@ -66,6 +68,8 @@ typedef struct CUSettings {
 		editor_line_fg_color = CU::Color::L_WHITE;
 
 		handleBreak = CUBreakType::COPY;
+
+		tabspacing = 4;
 	};
 
 	void copy(CUSettings &set){
@@ -94,5 +98,7 @@ typedef struct CUSettings {
 		editor_line_fg_color = set.editor_line_fg_color;		
 
 		handleBreak = set.handleBreak;
+
+		tabspacing = set.tabspacing;
 	};
 } CUSettings;
