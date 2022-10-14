@@ -34,6 +34,7 @@ private:
 
     std::string name;// Name of the file
     std::string path;// Where the file is located
+    std::string extention; // What is the file extention
     FileMode mode;   // What mode is the file opened in
 
 	std::vector<std::string> history;
@@ -50,7 +51,7 @@ public:
     std::vector<char> &getData();
     std::string getName();
     std::string getPath();
-
+    std::string getExt();
 };
 
 };

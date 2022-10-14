@@ -20,6 +20,8 @@ CU::ErrorCode CU::File::open(std::string o_path, CU::FileMode o_mode){
 
 	name = CU::filenameString(o_path);
 
+	extention = CU::extentString(name);
+
     mode = o_mode;
 
     fileLoaded = false;
@@ -77,6 +79,7 @@ CU::ErrorCode CU::File::openNew(std::string fname, CU::FileMode o_mode){
 	path = "";
 	name = fname;
     mode = o_mode;
+	extention = CU::extentString(fname);
 	// It's a new file, so no history
 	history.clear();
 	// Clear any data
@@ -134,5 +137,9 @@ std::string CU::File::getName(){
 
 std::string CU::File::getPath(){
 	return path;
+};
+
+std::string CU::File::getExt(){
+	return extention;
 };
 

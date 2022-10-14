@@ -21,10 +21,9 @@ CU::Driver::Driver(){
 		colorSupported = true;
 	}
 
-	// Make sure the mouse is supported
+	// Disable the mouse
 	terminalMouse.enabled = false;
-	//terminalMouse.enabled = true;
-	
+
 	// Disable keyboard delay
 	kbNoDelay();
 
@@ -36,11 +35,6 @@ CU::Driver::Driver(){
 
 	// Hide the "pysical" cursor
 	std::cout << "\x1B[?25l" << std::flush;
-
-	// Enable mouse tracking
-	if(terminalMouse.enabled){
-		std::cout << "\x1B[?1000;1003;1006;1015h" << std::flush;
-	}
 
 	// Bool to check if break happened
 	breakCalled = false;
@@ -73,10 +67,7 @@ void CU::Driver::shutdownDriver(){
 	// Show the "pysical" cursor
 	std::cout << "\x1B[?25h" << std::flush;
 
-	// Disable mouse tracking
-	if(terminalMouse.enabled){
-		std::cout << "\x1B[?1000;1003;1006;1015l" << std::flush;
-	}
+	disableMouse();
 
 	// Reset the handler
     struct sigaction action;
@@ -163,6 +154,22 @@ void CU::Driver::disableEcho(){
 
     term.c_lflag &= ~ECHO;
     tcsetattr(fileno(stdin), 0, &term);
+};
+
+void CU::Driver::enableMouse(){
+	// Enable mouse tracking
+	if(!terminalMouse.enabled){
+		std::cout << "\x1B[?1000;1003;1006;1015h" << std::flush;
+		terminalMouse.enabled = true;
+	}
+};
+
+void CU::Driver::disableMouse(){
+	// Disable mouse tracking
+	if(terminalMouse.enabled){
+		std::cout << "\x1B[?1000;1003;1006;1015l" << std::flush;
+		terminalMouse.enabled = false;
+	}
 };
 
 void CU::Driver::enableColor(){
@@ -938,6 +945,21 @@ std::string CU::safeifyString(std::string s){
 		}else{
 			short_str.push_back('?');
 		}
+	}
+	return short_str;
+};
+
+std::string CU::extentString(std::string s){
+	std::string short_str = "";
+	int extpoint = 0;
+	for(int i = 0; i < s.length(); i++){
+		if(s.at(i)=='.'){
+			extpoint = i+1;
+			break;
+		}
+	}
+	for(int i = extpoint; i < s.length(); i++){
+		short_str.push_back(s.at(i));
 	}
 	return short_str;
 };

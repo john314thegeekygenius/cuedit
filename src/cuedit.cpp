@@ -456,7 +456,18 @@ void CUEditor::loadSettings(){
 			else if(s_tag.compare("LINE-NUM-FG-COLOR")==0){
 				settings.editor_line_fg_color = (CU::Color)s_value;
 			}
-			
+			else if(s_tag.compare("TAB-SPACING")==0){
+				settings.tabspacing = s_value;
+			}
+			else if(s_tag.compare("USE-MOUSE")==0){
+				if(s_string.compare("true")==0 || s_value == 1){
+					// Yes!
+					videoDriver.enableMouse();
+				}else{
+					// Nope!
+					videoDriver.disableMouse();
+				}
+			}
 		}
 	}
 	 	
@@ -875,7 +886,8 @@ std::string CUEditor::loadFile(std::string load_path, bool showError){
 		fpath = load_path;
 		fileTabSelected = fileList.size()-1;
 		CU::fileInfo finfo;
-		fileInfo.push_back(finfo);
+
+		bool binary_file = false;
 
 		std::vector<char> & data = fileList.back().getData();
 		for( int i = 0; i < data.size(); i++){
@@ -886,7 +898,18 @@ std::string CUEditor::loadFile(std::string load_path, bool showError){
 					data.insert(data.begin()+i+e,' ');
 				}
 			}
+			if((data[i] < 32 || data[i] >= 127) && !(data[i] == 13 || data[i] == 10)){
+				binary_file = true;
+			}
 		}
+		if(binary_file){
+			finfo.type = CU::FileType::BINARY;
+		}else{
+			std::string ext = fileList.back().getExt();
+			finfo.type = CU::FileType::TEXT;
+		}
+		
+		fileInfo.push_back(finfo);
 
 	}
 	return fpath;
@@ -1167,6 +1190,7 @@ void CUEditor::createFile(std::string name){
 	}
 	fileList.back().openNew(fname,CU::FileMode::READ_WRITE);
 	CU::fileInfo finfo;
+	finfo.type = CU::FileType::TEXT;
 	fileInfo.push_back(finfo);
 	fileTabSelected = fileList.size()-1;
 };
@@ -1548,7 +1572,14 @@ void CUEditor::drawEditor(){
 		lineCount += 1;
 		
 		videoDriver.writeStr(lineNumStr,winX+1,winY+1+line_idx,settings.editor_line_fg_color, settings.editor_line_bg_color);
-		videoDriver.writeStr(lineString,winX+maxLineNumWidth+2,winY+1+line_idx,settings.editor_fg_color, settings.editor_bg_color);
+		if(fileInfo[fileTabSelected].type == CU::FileType::TEXT){
+			videoDriver.writeStr(lineString,winX+maxLineNumWidth+2,winY+1+line_idx,settings.editor_fg_color, settings.editor_bg_color);
+		}else
+		if(fileInfo[fileTabSelected].type == CU::FileType::BINARY){
+			// Write in hex form
+		}else{
+//			writeParsedString(lineString,winX+maxLineNumWidth+2,winY+1+line_idx);
+		}
 		videoDriver.setCurPos(winX+maxLineNumWidth+1,winY+1+line_idx);
 		videoDriver.writeBChar(CU::BlockChar::DVBAR);
 	}
@@ -1556,6 +1587,45 @@ void CUEditor::drawEditor(){
 		videoDriver.setCurPos(fileInfo[fileTabSelected].cursorX+winX+maxLineNumWidth+2-fileInfo[fileTabSelected].scrollX,fileInfo[fileTabSelected].cursorY+winY+1-fileInfo[fileTabSelected].scrollY);
 		videoDriver.writeBChar(CU::BlockChar::VBAR,settings.editor_fg_color, settings.editor_bg_color);
 	}
+};
+
+void CUEditor::generateIntelliFile(std::vector<CU::ParseStringType> &parsed_strings, std::vector<char> &s_data){
+	std::string sub_str = "";
+	CU::ParseType parse_type = CU::ParseType::TEXT;
+	for(int i = 0; i < s_data.size(); i++){
+		bool endparse = false;
+		if(s_data.at(i) == ':'){
+			i ++;
+			if(i < s_data.size()){
+				if(s_data.at(i) == ':'){
+					endparse = true;
+					parse_type = CU::ParseType::CLASS;
+				}
+			}
+		}
+		if(s_data.at(i) == ' '||s_data.at(i) == 13||s_data.at(i) == 10||s_data.at(i)==';'){
+			endparse = true;
+		}
+		if(endparse){
+			parsed_strings.push_back({sub_str, parse_type});
+			if(s_data.at(i) == ':'){
+				// Add a seperator
+				parsed_strings.push_back({"::",CU::ParseType::TEXT});
+			}
+			sub_str.clear();
+		}else{
+			sub_str.push_back(s_data.at(i));
+		}
+	}
+};
+
+void CUEditor::writeParsedString(CU::ParseStringType parsed_string, int x, int y){
+	/*
+	videoDriver.setCurPos(int x,int y);
+	videoDriver.setBGColor(Color c);
+	videoDriver.setFGColor(Color c);
+	videoDriver.putChar(int c);
+	*/
 };
 
 void CUEditor::handleInt(){

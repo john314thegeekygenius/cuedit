@@ -195,6 +195,9 @@ public:
 	void enableEcho();
 	void disableEcho();
 
+	void enableMouse();
+	void disableMouse();
+
 	void enableColor();
 	void disableColor();
 
@@ -240,6 +243,8 @@ std::string trimString(std::string s, int w);
 std::string fileizeString(std::string s, int fnw, int exw);
 
 std::string filenameString(std::string s);
+
+std::string extentString(std::string s);
 
 std::string safeifyString(std::string s);
 
