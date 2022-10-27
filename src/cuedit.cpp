@@ -115,6 +115,14 @@ int MMS_POpen(){
 	return 0;
 };
 
+std::vector<CUSubMenu_t> MM_LRun = {
+	{"Build", &CUMenuFNULL}, 
+	{"Run", &CUMenuFNULL}, 
+	{"Debug", &CUMenuFNULL}, 
+	{"Stop", &CUMenuFNULL}, 
+	{"Terminal", &CUMenuFNULL}, 
+};
+
 std::vector<CUSubMenu_t> MM_LProject = {
 	{"Open", &MMS_POpen}, 
 	{"Save", &CUMenuFNULL}, 
@@ -127,6 +135,11 @@ std::vector<CUSubMenu_t> MM_LProject = {
 std::vector<CUSubMenu_t> MM_LHelp = {
 	{"About", &CUMenuFNULL}, 
 	{"Help", &CUMenuFNULL}, 
+};
+
+
+CUMenu_t MM_Sub_Run = {
+	"Run", MM_LRun
 };
 
 CUMenu_t MM_Sub_Project = {
@@ -172,6 +185,7 @@ void CUEditor::init(int argc, char *argv[]){
 	mainMenu.addTab(MM_Sub_File);
 	mainMenu.addTab(MM_Sub_Edit);
 	mainMenu.addTab(MM_Sub_Settings);
+	mainMenu.addTab(MM_Sub_Run);
 	mainMenu.addTab(MM_Sub_Project);
 	mainMenu.addTab(MM_Sub_Help);
 
@@ -645,7 +659,12 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 
 	bool fileSelectSelected = true;
 
-	std::string WriteFileName = "dummy.txt";
+	std::string WriteFileName;
+	if(currentFileName == ""){
+		WriteFileName = "untitled.txt";
+	}else{
+		WriteFileName = currentFileName;
+	}
 
 	while(dialogOpen){
 		// Draw the window
@@ -808,6 +827,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 						}else{
 							dialogOpen = false;
 							fpath = loadFile(folderContents[fileSelected].path());
+							
 						}
 					}
 					else if(access_type == CU::FileAccess::WRITE){
@@ -843,6 +863,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 							fileList.pop_back();
 						}else {
 							fpath = folderContents[fileTabSelected].path();
+							currentFileName = WriteFileName;
 						}
 					}
 				}
@@ -910,7 +931,7 @@ std::string CUEditor::loadFile(std::string load_path, bool showError){
 		}
 		
 		fileInfo.push_back(finfo);
-
+		currentFileName = CU::filenameString(load_path);
 	}
 	return fpath;
 }
@@ -1188,6 +1209,7 @@ void CUEditor::createFile(std::string name){
 	}else{
 		fname = name;
 	}
+	currentFileName = fname;
 	fileList.back().openNew(fname,CU::FileMode::READ_WRITE);
 	CU::fileInfo finfo;
 	finfo.type = CU::FileType::TEXT;

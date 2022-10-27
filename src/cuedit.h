@@ -76,6 +76,7 @@ private:
 	int fileTabSelected = 0;
 	std::vector<std::string> clipboard;
 	std::string selected;
+	std::string currentFileName;
 
 	bool cursorBlink = false;
 	uint64_t cursorTime = 0;
