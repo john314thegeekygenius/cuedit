@@ -4,6 +4,86 @@ INFO:Execuatble Location:/media/jonathan/AcerDisk/Ubuntu/Documents/CedarLinux/cu
 INFO:Initalized window at 0,1
 INFO:Raw bytes:1
 INFO:Raw:27
+INFO:Raw bytes:1
+INFO:Raw:10
+INFO:Raw bytes:1
+INFO:Raw:10
+INFO:Raw bytes:1
+INFO:Raw:102
+INFO:Raw bytes:1
+INFO:Raw:100
+INFO:Raw bytes:1
+INFO:Raw:104
+INFO:Raw bytes:1
+INFO:Raw:106
+INFO:Raw bytes:1
+INFO:Raw:117
+INFO:Raw bytes:1
+INFO:Raw:114
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:1
+INFO:Raw:104
+INFO:Raw bytes:1
+INFO:Raw:117
+INFO:Raw bytes:1
+INFO:Raw:114
+INFO:Raw bytes:1
+INFO:Raw:117
+INFO:Raw bytes:1
+INFO:Raw:104
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:1
+INFO:Raw:114
+INFO:Raw bytes:1
+INFO:Raw:104
+INFO:Raw bytes:1
+INFO:Raw:117
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:1
+INFO:Raw:104
+INFO:Raw bytes:1
+INFO:Raw:117
+INFO:Raw bytes:1
+INFO:Raw:114
+INFO:Raw bytes:1
+INFO:Raw:103
+INFO:Raw bytes:6
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:49
+INFO:Raw:59
+INFO:Raw:53
+INFO:Raw:68
+INFO:Raw bytes:6
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:49
+INFO:Raw:59
+INFO:Raw:53
+INFO:Raw:68
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:70
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:70
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:70
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:70
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:70
 INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
@@ -20,102 +100,402 @@ INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
 INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:126
+INFO:Raw bytes:1
+INFO:Raw:126
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:127
+INFO:Raw bytes:1
+INFO:Raw:27
+INFO:Raw bytes:1
+INFO:Raw:10
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:68
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:68
+INFO:Raw bytes:1
+INFO:Raw:27
+INFO:Raw bytes:1
+INFO:Raw:10
 INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
 INFO:Raw:68
 INFO:Raw bytes:1
 INFO:Raw:10
-INFO:Raw bytes:3
+INFO:Raw bytes:1
 INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:66
 INFO:Raw bytes:1
 INFO:Raw:10
 INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:1
-INFO:Raw:27
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:67
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:3
-INFO:Raw:27
-INFO:Raw:91
-INFO:Raw:68
-INFO:Raw bytes:1
-INFO:Raw:10
+INFO:Raw:66
 INFO:Raw bytes:3
 INFO:Raw:27
 INFO:Raw:91
@@ -143,3 +523,13 @@ INFO:Raw:66
 INFO:Raw bytes:1
 INFO:Raw:10
 INFO:Quiting Program
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:67
+INFO:Raw bytes:3
+INFO:Raw:27
+INFO:Raw:91
+INFO:Raw:65
+INFO:Raw bytes:1
+INFO:Raw:10

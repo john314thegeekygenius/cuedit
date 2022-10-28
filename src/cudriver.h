@@ -204,6 +204,7 @@ public:
 
 	Mouse_t getMouse();
 	int getMValue();
+	void cleanChBuffer();
 
 	void setCurPos(int x,int y);
 //	void hideCursor();
