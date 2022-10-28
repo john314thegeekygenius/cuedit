@@ -612,15 +612,16 @@ char CU::Driver::getch() {
 		ungetchbuffer.pop_back();
 	}else{
 		read(0, &buf, 1);
-		if(getchbuffersize)
-			getchbuffersize -= 1;
 		debugWrite("Raw:"+std::to_string(buf));
 	}
+	if(getchbuffersize)
+		getchbuffersize -= 1;
 	return (buf);
 };
 
 void CU::Driver::ungetch(char buf) {
 	ungetchbuffer.push_back(buf);
+	getchbuffersize += 1;
 };
 
 void CU::Driver::cleanChBuffer(){
