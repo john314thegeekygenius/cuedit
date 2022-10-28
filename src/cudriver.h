@@ -173,6 +173,7 @@ private:
 	Mouse_t terminalMouse;
 
 	std::vector<int> ungetchbuffer;
+	int getchbuffersize = 0;
 
 public:
 	Driver();

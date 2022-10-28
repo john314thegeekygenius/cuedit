@@ -601,6 +601,7 @@ int CU::Driver::kbhit(void) {
 	if(nbbytes){
 		debugWrite("Raw bytes:"+std::to_string(nbbytes));
 	}
+	getchbuffersize += nbbytes;
     return nbbytes;
 };
 
@@ -611,6 +612,8 @@ char CU::Driver::getch() {
 		ungetchbuffer.pop_back();
 	}else{
 		read(0, &buf, 1);
+		if(getchbuffersize)
+			getchbuffersize -= 1;
 		debugWrite("Raw:"+std::to_string(buf));
 	}
 	return (buf);
@@ -618,6 +621,10 @@ char CU::Driver::getch() {
 
 void CU::Driver::ungetch(char buf) {
 	ungetchbuffer.push_back(buf);
+};
+
+void CU::Driver::cleanChBuffer(){
+	while(getchbuffersize) { getch(); };
 };
 
 int CU::Driver::getMValue(){
@@ -826,6 +833,7 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 		}
 		//CU::debugWrite("Key pressed "+std::to_string(ch));
 	}
+	cleanChBuffer(); 
 	return (CU::keyCode)key;
 };
 
