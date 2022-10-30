@@ -1,7 +1,9 @@
 
 OBJ_FILES := obj/cuedit.o obj/cudriver.o obj/cumenu.o obj/cufile.o obj/cuproject.o
 
-CXX_FLAGS := -std=c++17
+LIBS := -lncursesw
+
+CXX_FLAGS := -std=c++17 -DUSE_NCURSES 
 #-O3
 
 
@@ -12,18 +14,18 @@ cuedit:
 	make cuedit.o cudriver.o cumenu.o cufile.o cuproject.o
 
 release: cuedit
-	g++ $(OBJ_FILES) -o bin/cuedit
+	g++ $(OBJ_FILES) -o bin/cuedit $(LIBS)
 
 cuedit.o:
-	g++ $(CXX_FLAGS) -c src/cuedit.cpp -o obj/cuedit.o
+	g++ $(CXX_FLAGS) -c src/cuedit.cpp -o obj/cuedit.o $(LIBS)
 cudriver.o:
-	g++ $(CXX_FLAGS) -c src/cudriver.cpp -o obj/cudriver.o
+	g++ $(CXX_FLAGS) -c src/cudriver.cpp -o obj/cudriver.o $(LIBS)
 cumenu.o:
-	g++ $(CXX_FLAGS) -c src/cumenu.cpp -o obj/cumenu.o
+	g++ $(CXX_FLAGS) -c src/cumenu.cpp -o obj/cumenu.o $(LIBS)
 cufile.o:
-	g++ $(CXX_FLAGS) -c src/cufile.cpp -o obj/cufile.o
+	g++ $(CXX_FLAGS) -c src/cufile.cpp -o obj/cufile.o $(LIBS)
 cuproject.o:
-	g++ $(CXX_FLAGS) -c src/cuproject.cpp -o obj/cuproject.o
+	g++ $(CXX_FLAGS) -c src/cuproject.cpp -o obj/cuproject.o $(LIBS)
 
 
 clean:

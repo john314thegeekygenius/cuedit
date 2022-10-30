@@ -26,6 +26,10 @@
 #include <chrono>
 #include <filesystem>
 
+#ifdef USE_NCURSES
+#include <locale.h>
+#include <ncurses.h>
+#endif
 
 namespace CU {
 
@@ -83,37 +87,6 @@ enum class BlockChar{
 
 const int UNIBlockCount = 0x26;
 
-const std::string UNIBlockChars [] = {
-	// Single lines
-	"\u250F",
-	"\u2513",
-	"\u2517",
-	"\u251B",
-	"\u2523",
-	"\u252B",
-	"\u2533",
-	"\u253B",
-	"\u2501",
-	"\u2503",
-	// Double lines	
-	"\u2554",
-	"\u2557",
-	"\u255A",
-	"\u255D",
-	"\u2560",
-	"\u2563",
-	"\u2566",
-	"\u2569",
-	"\u2550",
-	"\u2551",
-	// Solid Blocks
-	"\u2588",
-	"\u2584",
-	"\u2580",
-	"\u2590",
-	"\u2591",
-	"\u2592",
-};
 
 enum class BlockType {
 	SINGLE = 0,
@@ -137,16 +110,16 @@ enum class MouseMask {
 };
 
 typedef struct Mouse_t {
-	int blockX;
-	int blockY;
+	int blockX = 0;
+	int blockY = 0;
 
-	int clickX;
-	int clickY;
+	int clickX = 0;
+	int clickY = 0;
 
-	int scroll;
+	int scroll = 0;
 	MouseMask buttonMask;
 
-	bool enabled;
+	bool enabled = false;
 }Mouse_t;
 
 class Driver {
@@ -186,6 +159,7 @@ public:
 	void updateDriver();
 
 	void setupHandle(__sighandler_t handle);
+	void disableHandler();
 	void halt(int e);
 	int halted();
 	void clearHalt();
@@ -212,8 +186,8 @@ public:
 	void setBGColor(Color c);
 	void setFGColor(Color c);
 	void putChar(int c);
-	void clear();
-	void flush();
+	void clearScr();
+	void flushScr();
 	void writeBChar(BlockChar c);
 	void writeBChar(BlockChar c, Color fg, Color bg);
 	void drawBox(int x,int y,int w,int h,BlockType t, Color fg = Color::WHITE, Color bg = Color::BLACK);
@@ -227,10 +201,10 @@ public:
 
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 	void kbNoDelay();
-	int kbhit();
-	char getch();
-	void ungetch(char ch);
-	keyCode getkey();
+	int kbHit();
+	int getCh();
+	void unGetCh(char ch);
+	keyCode getKey();
 
 };
 

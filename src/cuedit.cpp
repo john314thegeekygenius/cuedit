@@ -17,6 +17,7 @@ CUEditor editor;
 
 void breakHandle(int e){
 	editor.halt(e);
+	//SIGWINCH
 	CU::debugWrite("int "+std::to_string(e));
 };
 
@@ -230,7 +231,7 @@ void CUEditor::run(){
 			}
 		}else{
 
-			CU::keyCode key = videoDriver.getkey();
+			CU::keyCode key = videoDriver.getKey();
 
 			if(key == CU::keyCode::k_escape){
 				MainMenuTabsSelected = !MainMenuTabsSelected;
@@ -304,7 +305,7 @@ void CUEditor::run(){
 
 		videoDriver.clearHalt();
 
-		videoDriver.flush();
+		videoDriver.flushScr();
 		//videoDriver.updateDriver();
 
 	}
@@ -320,8 +321,11 @@ void CUEditor::halt(int e){
 };
 
 void CUEditor::drawGUI(){
+	// Resize the main menu
+	mainMenu.resize(videoDriver.getWidth(),videoDriver.getHeight()-1);
+
 	// Clear the screen
-	videoDriver.clear();
+	videoDriver.clearScr();
 	videoDriver.drawBar(0,0,videoDriver.getWidth(), videoDriver.getHeight(), ' ', settings.foreground_color, settings.background_color);
 	// Draw the header
 	videoDriver.drawBar(0,0,videoDriver.getWidth(), 1, ' ', settings.head_fg_color, settings.head_bg_color);
@@ -778,7 +782,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 
 		videoDriver.writeStr("Last modified:"+folderFileTimes[fileSelected].first+" "+folderFileTimes[fileSelected].second, menuX + 1, menuY + menuHeight-2);
 
-		CU::keyCode key = videoDriver.getkey();
+		CU::keyCode key = videoDriver.getKey();
 
 		if(key == CU::keyCode::k_escape){
 			dialogOpen = false;
@@ -875,7 +879,7 @@ std::string CUEditor::openFileDialog(std::string WinName, CU::FileAccess access_
 
 		videoDriver.clearHalt();
 
-		videoDriver.flush();
+		videoDriver.flushScr();
 		//videoDriver.updateDriver();
 	}
 
@@ -1046,7 +1050,7 @@ void CUEditor::ErrorMsgBox(std::string error){
 	bool userAck = false;
 	while(!userAck){
 
-		CU::keyCode key = videoDriver.getkey();
+		CU::keyCode key = videoDriver.getKey();
 
 		if(key == CU::keyCode::k_escape || key == CU::keyCode::k_return){
 			userAck = true;
@@ -1066,7 +1070,7 @@ void CUEditor::ErrorMsgBox(std::string error){
 
 		videoDriver.clearHalt();
 
-		videoDriver.flush();
+		videoDriver.flushScr();
 		//videoDriver.updateDriver();
 	}
 };
@@ -1084,7 +1088,7 @@ bool CUEditor::AreYouSure(std::string warning){
 	bool yesNoSelect = false;
 	while(!userAck){
 
-		CU::keyCode key = videoDriver.getkey();
+		CU::keyCode key = videoDriver.getKey();
 
 		if(key == CU::keyCode::k_escape){
 			userAck = true;
@@ -1134,7 +1138,7 @@ bool CUEditor::AreYouSure(std::string warning){
 		}
 		videoDriver.clearHalt();
 
-		videoDriver.flush();
+		videoDriver.flushScr();
 		//videoDriver.updateDriver();
 	}
 	return returnValue;
@@ -1153,7 +1157,7 @@ std::string CUEditor::getUserString(std::string msg,int maxLength){
 
 	while(!userAck){
 
-		CU::keyCode key = videoDriver.getkey();
+		CU::keyCode key = videoDriver.getKey();
 
 		if(key == CU::keyCode::k_escape){
 			userAck = true;
@@ -1189,7 +1193,7 @@ std::string CUEditor::getUserString(std::string msg,int maxLength){
 
 		videoDriver.clearHalt();
 
-		videoDriver.flush();
+		videoDriver.flushScr();
 		//videoDriver.updateDriver();
 	}
 	return outputString;

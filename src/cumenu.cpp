@@ -36,6 +36,11 @@ void CUMenu::init(int mx, int my, int w, int h, bool resize, bool minimize, bool
 	CU::debugWrite("Initalized window at " + std::to_string(mx)+","+std::to_string(my));
 };
 
+void CUMenu::resize(int w, int h){
+	menuWidth = w;
+	menuHeight = h;
+};
+
 void CUMenu::copySettings(CUSettings &set){
 	settings.copy(set);
 };

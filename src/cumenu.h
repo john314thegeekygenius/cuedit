@@ -53,6 +53,8 @@ public:
 	int getTab();
 	int numTabs();
 
+	void resize(int w, int h);
+
 	bool tabOpen(int tab);
 	void closeTab(int tab);
 	void openTab(int tab);

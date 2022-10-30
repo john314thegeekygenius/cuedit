@@ -11,8 +11,102 @@
 
 #include "cuheads.h"
 
+namespace CU {
+#ifdef USE_NCURSES
+const wchar_t * UNIBlockChars [] = {
+	// Single lines
+	L"\u250F",
+	L"\u2513",
+	L"\u2517",
+	L"\u251B",
+	L"\u2523",
+	L"\u252B",
+	L"\u2533",
+	L"\u253B",
+	L"\u2501",
+	L"\u2503",
+	// Double lines	
+	L"\u2554",
+	L"\u2557",
+	L"\u255A",
+	L"\u255D",
+	L"\u2560",
+	L"\u2563",
+	L"\u2566",
+	L"\u2569",
+	L"\u2550",
+	L"\u2551",
+	// Solid Blocks
+	L"\u2588",
+	L"\u2584",
+	L"\u2580",
+	L"\u2590",
+	L"\u2591",
+	L"\u2592",
+};
+#else
+const std::string UNIBlockChars [] = {
+	// Single lines
+	"\u250F",
+	"\u2513",
+	"\u2517",
+	"\u251B",
+	"\u2523",
+	"\u252B",
+	"\u2533",
+	"\u253B",
+	"\u2501",
+	"\u2503",
+	// Double lines	
+	"\u2554",
+	"\u2557",
+	"\u255A",
+	"\u255D",
+	"\u2560",
+	"\u2563",
+	"\u2566",
+	"\u2569",
+	"\u2550",
+	"\u2551",
+	// Solid Blocks
+	"\u2588",
+	"\u2584",
+	"\u2580",
+	"\u2590",
+	"\u2591",
+	"\u2592",
+};
+#endif
+};
+
 
 CU::Driver::Driver(){
+#ifdef USE_NCURSES
+	setlocale(LC_ALL, "");
+
+	initscr();
+	// Make sure it's a valid terminal for color
+	colorSupported = false;
+
+	if (has_colors()) {
+		start_color();
+
+		colorSupported = true;
+		// Setup the color pairs
+		int fg, bg;
+		int colorpair;
+
+		for (bg = 0; bg <= 7; bg++) {
+			for (fg = 0; fg <= 7; fg++) {
+				init_pair((bg*8)+fg, fg, bg);
+			}
+		}
+	}
+
+	// Enable the mouse
+	terminalMouse.enabled = false;
+	enableMouse();
+#else
 	// Make sure it's a valid terminal for color
 	colorSupported = false;
 
@@ -22,7 +116,9 @@ CU::Driver::Driver(){
 	}
 
 	// Disable the mouse
-	terminalMouse.enabled = false;
+	disableMouse();
+
+#endif
 
 	// Disable keyboard delay
 	kbNoDelay();
@@ -32,13 +128,12 @@ CU::Driver::Driver(){
 
 	// Update the variables
 	updateDriver();
-
+#ifndef USE_NCURSES
 	// Hide the "pysical" cursor
 	std::cout << "\x1B[?25l" << std::flush;
-
+#endif
 	// Bool to check if break happened
 	breakCalled = false;
-
 };
 
 CU::Driver::~Driver(){
@@ -58,6 +153,7 @@ void CU::Driver::shutdownDriver(){
 	// Enable echo
 	enableEcho();
 
+#ifndef USE_NCURSES
 	// Reset color stuff
 	std::cout << "\033[0m" << std::flush;
 
@@ -66,15 +162,15 @@ void CU::Driver::shutdownDriver(){
 
 	// Show the "pysical" cursor
 	std::cout << "\x1B[?25h" << std::flush;
+#endif
 
 	disableMouse();
 
-	// Reset the handler
-    struct sigaction action;
-    action.sa_handler = SIG_DFL;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    sigaction(SIGINT, &action, nullptr);
+	disableHandler();
+
+#ifdef USE_NCURSES
+	endwin();
+#endif
 
 	// Say goodbye
 	debugWrite("Closed driver");
@@ -88,7 +184,7 @@ void CU::Driver::updateDriver(){
 
 	scrWidth = w.ws_col;
 	scrHeight = w.ws_row;
-	
+
 	scrSize = scrWidth*scrHeight;
 
 	// Clear the buffer
@@ -103,6 +199,7 @@ void CU::Driver::updateDriver(){
 
 
 void CU::Driver::setupHandle(__sighandler_t handle){
+#ifndef USE_NCURSES
 	breakHandle = handle;
 	// Add handler for break command
 	struct sigaction sigIntHandler;
@@ -110,15 +207,34 @@ void CU::Driver::setupHandle(__sighandler_t handle){
 	sigIntHandler.sa_handler = (__sighandler_t)breakHandle;
 	sigemptyset(&sigIntHandler.sa_mask);
 	sigIntHandler.sa_flags = SA_RESTART;
+
 	if(sigaction(SIGINT, &sigIntHandler, NULL) || sigaction(SIGTSTP, &sigIntHandler, NULL) || sigaction(SIGQUIT, &sigIntHandler, NULL) || 
-		sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL)){
+		sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL) ){
 		halted();
 		debugWrite("Failed to init handler", CU::DebugMsgType::ERROR);
 		return;
 	}
 	debugWrite("Setup Handler");
+#endif
 };
 
+void CU::Driver::disableHandler(){
+#ifndef USE_NCURSES
+	// Reset the handler
+    struct sigaction action;
+    action.sa_handler = SIG_DFL;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
+    sigaction(SIGINT, &action, nullptr);
+    sigaction(SIGTSTP, &action, nullptr);
+    sigaction(SIGTERM, &action, nullptr);
+    sigaction(SIGQUIT, &action, nullptr);
+    sigaction(SIGABRT, &action, nullptr);
+
+	debugWrite("Shutdown Handler");
+#endif
+};
 
 void CU::Driver::halt(int e){
 	breakCalled = e;
@@ -141,35 +257,63 @@ int CU::Driver::getHeight(){
 };
 
 void CU::Driver::enableEcho(){
+#ifdef USE_NCURSES
+	echo();
+	// Enable the cursor
+	curs_set(1);
+#else
     struct termios term;
     tcgetattr(fileno(stdin), &term);
 
     term.c_lflag |= ECHO;
     tcsetattr(fileno(stdin), 0, &term);
+#endif
 };
 
 void CU::Driver::disableEcho(){
+#ifdef USE_NCURSES
+	noecho();
+	// Disable the cursor
+	curs_set(0);
+#else
     struct termios term;
     tcgetattr(fileno(stdin), &term);
 
     term.c_lflag &= ~ECHO;
     tcsetattr(fileno(stdin), 0, &term);
+#endif
 };
 
 void CU::Driver::enableMouse(){
+#ifdef USE_NCURSES
+	if(!terminalMouse.enabled){
+		mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
+		std::cout << "\x1B[?1003h" << std::flush;
+		terminalMouse.enabled = true;
+		mouseinterval(0);
+	}
+#else
 	// Enable mouse tracking
 	if(!terminalMouse.enabled){
 		std::cout << "\x1B[?1000;1003;1006;1015h" << std::flush;
 		terminalMouse.enabled = true;
 	}
+#endif
 };
 
 void CU::Driver::disableMouse(){
+#ifdef USE_NCURSES
+	if(terminalMouse.enabled){
+		std::cout << "\x1B[?1003l" << std::flush;
+		terminalMouse.enabled = false;
+	}
+#else
 	// Disable mouse tracking
 	if(terminalMouse.enabled){
 		std::cout << "\x1B[?1000;1003;1006;1015l" << std::flush;
 		terminalMouse.enabled = false;
 	}
+#endif
 };
 
 void CU::Driver::enableColor(){
@@ -216,7 +360,7 @@ void CU::Driver::putChar(int c){
 };
 
 
-void CU::Driver::clear(){
+void CU::Driver::clearScr(){
 	if(scrBuffer.size()){
 		std::fill_n(scrBuffer.begin(), scrSize, 0);
 		std::fill_n(scrBuffer.begin()+scrSize, scrSize, 0);
@@ -225,7 +369,7 @@ void CU::Driver::clear(){
 	}
 };
 
-void CU::Driver::flush(){
+void CU::Driver::flushScr(){
 	// Wait for the FPS to be correct before we draw the screen
 	using namespace std::chrono;
 	uint64_t vtime_now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -256,12 +400,18 @@ void CU::Driver::flush(){
 		}
 	}
 
+#ifdef USE_NCURSES
+	//clear();
+	move(0,0);
+#endif
 
 	for(int y = 0; y < scrHeight; y++){
 		for(int x = 0; x < scrWidth; x++){
+			int bg = -1, fg = -1;
 			if(colorSupported){
-				int bg = 40+(+scrBuffer[scrSize+(y*scrWidth) + x]&0x0F);
-				int fg = 30+(+scrBuffer[scrSize+(y*scrWidth) + x]>>8);
+				bg = 40+(scrBuffer[scrSize+(y*scrWidth) + x]&0x0F);
+				fg = 30+(scrBuffer[scrSize+(y*scrWidth) + x]>>8);
+#ifndef USE_NCURSES
 				if(bg > 47){
 					bg -= 8; // There is no bright backgrounds?
 				}
@@ -274,30 +424,69 @@ void CU::Driver::flush(){
 				buffer_string += "\x1B[";
 				buffer_string += std::to_string(fg);
 				buffer_string += "m";
+#else
+	fg -= 30;
+	bg -= 40;
+	if(bg > 7){
+		bg -= 8; // There is no bright backgrounds?
+	}
+	if(fg > 7){
+		fg -= 8;
+	}
+	attron(COLOR_PAIR((bg*8)+fg));
+#endif
 			}
+#ifdef USE_NCURSES
+			else {
+				if(fg >=0 && bg >= 0){
+					attroff(COLOR_PAIR((bg*8)+fg));
+				}
+			}
+#endif
 
 			int C = scrBuffer[(y*scrWidth) + x];
 			if(C & 0x8000){
 				if((C&0xFF) < UNIBlockCount){
+#ifdef USE_NCURSES
+					addwstr(CU::UNIBlockChars[C&0xFF]);
+#else
 					buffer_string += CU::UNIBlockChars[C&0xFF];
+#endif
 				}else{
+#ifdef USE_NCURSES
+				addch('?');
+#else
 					buffer_string += '?';
+#endif
 				}
 			}else{
-				if(C >= 32 && C <= 126)
+				if(C >= 32 && C <= 126) {
+#ifdef USE_NCURSES
+				addch((C?C:' '));
+#else
 					buffer_string += (char)(C?C:' ');
-				else
+#endif
+				}
+				else {
+#ifdef USE_NCURSES
+				addch('?');
+#else
 					buffer_string += '?';
+#endif
+				}
 			}
 		}
 	}
-
+#ifdef USE_NCURSES
+	refresh();
+#else
 	// set the cursor position
 	std::fputs("\x1b[3J\033[H",stdout);
 	
 	// output the buffer to the screen
 	std::fputs(buffer_string.c_str(),stdout);
 	std::fflush(stdout);
+#endif
 };
 
 void CU::Driver::writeBChar(CU::BlockChar c){
@@ -580,6 +769,14 @@ void CU::Driver::writeStrW(std::string s, int x,int y, int w, Color fg, Color bg
 
 
 void CU::Driver::kbNoDelay(){
+#ifdef USE_NCURSES
+	raw();
+	intrflush(stdscr, FALSE);
+	keypad(stdscr, TRUE);
+	nodelay(stdscr, TRUE);
+	set_escdelay(100); // Set it to 100ms since internet is so fast nowadays
+
+#else
 	// From: https://stackoverflow.com/questions/421860/capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed
 	// Use termios to turn off line buffering
 	struct termios term;
@@ -592,10 +789,25 @@ void CU::Driver::kbNoDelay(){
 
 	tcsetattr(0, TCSANOW, &term); // 0 is STDIN
 	setbuf(stdin, NULL);
-
+#endif
 };
 
-int CU::Driver::kbhit(void) {
+int CU::Driver::kbHit(void) {
+#ifdef USE_NCURSES
+	std::vector<int> chs;
+	int chd = wgetch(stdscr);
+	int chc = 0;
+	do {
+		chd = wgetch(stdscr);
+		chs.push_back(chd);
+	}while(chd!=ERR);
+	chs.pop_back();
+	chc = chs.size();
+	for(int & c : chs){
+		ungetch(c);
+	}
+	return chc;
+#else
     int nbbytes;
     ioctl(0, FIONREAD, &nbbytes);  // 0 is STDIN
 	if(nbbytes){
@@ -603,9 +815,13 @@ int CU::Driver::kbhit(void) {
 	}
 	getchbuffersize += nbbytes;
     return nbbytes;
+#endif
 };
 
-char CU::Driver::getch() {
+int CU::Driver::getCh() {
+#ifdef USE_NCURSES
+	return wgetch(stdscr);
+#else
 	char buf = 0;
 	if(ungetchbuffer.size()){
 		buf = ungetchbuffer.back();
@@ -617,29 +833,36 @@ char CU::Driver::getch() {
 	if(getchbuffersize)
 		getchbuffersize -= 1;
 	return (buf);
+#endif
 };
 
-void CU::Driver::ungetch(char buf) {
+void CU::Driver::unGetCh(char buf) {
+#ifdef USE_NCURSES
+	ungetch(buf);
+#else
 	ungetchbuffer.push_back(buf);
 	getchbuffersize += 1;
+#endif
 };
 
 void CU::Driver::cleanChBuffer(){
-	while(getchbuffersize) { getch(); };
+	while(getchbuffersize) { getCh(); };
 };
 
 int CU::Driver::getMValue(){
+#ifdef USE_NCURSES
+#else
 	char ch = 0;
 	int outValue = 0;
 	bool loadFlag = false;
 	std::string ostr = "";
 	for(int i = 0; i < 12; i++){
-		ch = getch();
+		ch = getCh();
 		if(ch == 59){
 			loadFlag = !loadFlag;
 		}
 		if(loadFlag==false || (ch == 77 || ch == 109)) {
-			ungetch(ch);
+			unGetCh(ch);
 			break; // end of value collection
 		}
 		if(ch != 59){
@@ -649,14 +872,107 @@ int CU::Driver::getMValue(){
 	}
 	CU::debugWrite(std::to_string(outValue));
 	return outValue;
+#endif
+	return 0;
 };
 
-CU::keyCode CU::Driver::getkey() {
+CU::keyCode CU::Driver::getKey() {
+#ifdef USE_NCURSES
 	int key = (int)CU::keyCode::k_null;
-	int keyCount = kbhit();
+	int ch = getCh();
+
+	terminalMouse.buttonMask = CU::MouseMask::NONE;
+
+    if(ch == KEY_MOUSE){
+		MEVENT event;
+        if(getmouse(&event) == OK){
+			if(terminalMouse.enabled){
+				terminalMouse.blockX = event.x;
+				terminalMouse.blockY = event.y;
+				CU::debugWrite(std::to_string(event.x));
+				CU::debugWrite(std::to_string(event.y));
+				CU::debugWrite("---");
+			}
+
+//			if(event.bstate & BUTTON1_CLICKED){
+//			}
+
+			if(event.bstate & BUTTON1_PRESSED){
+				terminalMouse.buttonMask = CU::MouseMask::LBUTTON;
+				terminalMouse.clickX = event.x;
+				terminalMouse.clickY = event.y;
+			}
+			if(event.bstate & BUTTON1_RELEASED){
+				terminalMouse.buttonMask = (CU::MouseMask)((int)CU::MouseMask::RELEASED | (int)CU::MouseMask::LBUTTON);
+				terminalMouse.clickX = event.x;
+				terminalMouse.clickY = event.y;
+			}
+			if(event.bstate & BUTTON2_PRESSED){
+				terminalMouse.buttonMask = CU::MouseMask::MBUTTON;
+				terminalMouse.clickX = event.x;
+				terminalMouse.clickY = event.y;
+			}
+			if(event.bstate & BUTTON2_RELEASED){
+				terminalMouse.buttonMask = (CU::MouseMask)((int)CU::MouseMask::RELEASED | (int)CU::MouseMask::MBUTTON);
+				terminalMouse.clickX = event.x;
+				terminalMouse.clickY = event.y;
+			}
+			if(event.bstate & BUTTON3_PRESSED){
+				terminalMouse.buttonMask = CU::MouseMask::RBUTTON;
+				terminalMouse.clickX = event.x;
+				terminalMouse.clickY = event.y;
+			}
+			if(event.bstate & BUTTON3_RELEASED){
+				terminalMouse.buttonMask = (CU::MouseMask)((int)CU::MouseMask::RELEASED | (int)CU::MouseMask::RBUTTON);
+				terminalMouse.clickX = event.x;
+				terminalMouse.clickY = event.y;
+			}
+
+		}
+	}else
+	if(ch == ERR){
+		key = (int)CU::keyCode::k_null;
+	}else if(ch == KEY_RESIZE){
+		// Terminal resized
+		updateDriver();
+	}else if(ch >= 8 && ch <= 126){
+		key = ch;
+	}else{
+		//https://pubs.opengroup.org/onlinepubs/7908799/xcurses/curses.h.html
+		switch(ch){
+			case KEY_UP:
+				key = (int)CU::keyCode::s_up;
+				break;
+			case KEY_DOWN:
+				key = (int)CU::keyCode::s_down;
+				break;
+			case KEY_LEFT:
+				key = (int)CU::keyCode::s_left;
+				break;
+			case KEY_RIGHT:
+				key = (int)CU::keyCode::s_right;
+				break;
+			case KEY_DC:
+				key = (int)CU::keyCode::s_delete;
+				break;
+			case KEY_SAVE:
+				key = (int)CU::keyCode::l_s | (int)CU::keyCode::c_ctrl;
+				break;
+			case KEY_BACKSPACE:
+				key = (int)CU::keyCode::k_backspace;
+				break;
+			default:
+				break;
+		}
+	}
+	return (CU::keyCode)key;
+#else
+	int key = (int)CU::keyCode::k_null;
+	int keyCount = kbHit();
 
 /*
 	https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+	https://invisible-island.net/ncurses/ncurses.faq.html#modified_keys
 	https://stackoverflow.com/questions/5966903/how-to-get-mousemove-and-mouseclick-in-bash
 	https://stackoverflow.com/questions/44116977/get-mouse-position-in-pixels-using-escape-sequences
 
@@ -701,24 +1017,24 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 */
 
 	if(keyCount){
-		char ch = getch(); 
+		char ch = getCh(); 
 
 		// Handle Escape codes (Special keys)
 		if(ch == 0x1b){
 			if(keyCount>1){
-				char specialcheck = getch();
+				char specialcheck = getCh();
 				if(specialcheck == 0x5b){
 					if(keyCount>3){
-						specialcheck = getch();
+						specialcheck = getCh();
 						if(specialcheck == 0x3c){
 							if(terminalMouse.enabled){
 								// Mouse events!
 								char idchk[2];
-								idchk[0] = getch();
-								idchk[1] = getch();
+								idchk[0] = getCh();
+								idchk[1] = getCh();
 
 								if(idchk[0] >= 48 && idchk[0] <= 50 && idchk[1]==59) {
-									ungetch(idchk[1]);
+									unGetCh(idchk[1]);
 									// Get the mouse position
 									terminalMouse.clickX = getMValue()-1;
 									terminalMouse.clickY = getMValue()-1;
@@ -732,7 +1048,7 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 										terminalMouse.buttonMask = CU::MouseMask::MBUTTON;
 									if(idchk[0] == 50)
 										terminalMouse.buttonMask = CU::MouseMask::RBUTTON;
-									char mskchk = getch();
+									char mskchk = getCh();
 									if(mskchk == 109){
 										int t = (int)terminalMouse.buttonMask;
 										t |= (int)CU::MouseMask::RELEASED;
@@ -762,14 +1078,14 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 									terminalMouse.blockY = getMValue()-1;
 								}
 								// Catch the mouse identifier
-								char mouseCatch = getch();
+								char mouseCatch = getCh();
 							}
 						}else
 						if(specialcheck == 0x31){
-							specialcheck = getch();
+							specialcheck = getCh();
 							if(specialcheck == 0x3b){
 								// Read the special key
-								ch = getch();
+								ch = getCh();
 								if(ch == 50) {
 									key |= (int)CU::keyCode::c_shift;
 								}
@@ -784,19 +1100,19 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 						}
 						if(keyCount==4){
 							if(specialcheck == 0x33){
-								ch = getch();
+								ch = getCh();
 								if(ch == 126) {
 									key |= (int)CU::keyCode::s_delete;
 								}
 							}
 							if(specialcheck == 0x35){
-								ch = getch();
+								ch = getCh();
 								if(ch == 126) {
 									key |= (int)CU::keyCode::s_pg_up;
 								}
 							}
 							if(specialcheck == 0x36){
-								ch = getch();
+								ch = getCh();
 								if(ch == 126) {
 									key |= (int)CU::keyCode::s_pg_down;
 								}
@@ -804,7 +1120,7 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 						}
 					}
 					if(keyCount<=3){
-						ch = getch();
+						ch = getCh();
 						// Set to the correct keycode
 						if(ch == 65){
 							key |= (int)CU::keyCode::s_up;
@@ -834,8 +1150,11 @@ Scrl Dwn :27 91 60 54 53 59 49 59 49 77
 		}
 		//CU::debugWrite("Key pressed "+std::to_string(ch));
 	}
+	// Fix the backspace key?
+	if(key == 8){ key = (int)CU::keyCode::k_backspace;}
 	cleanChBuffer(); 
 	return (CU::keyCode)key;
+#endif
 };
 
 CU::Mouse_t CU::Driver::getMouse(){
