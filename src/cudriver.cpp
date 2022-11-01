@@ -209,7 +209,7 @@ void CU::Driver::setupHandle(__sighandler_t handle){
     sigIntHandler.sa_flags = SA_RESTART;
 
     if(sigaction(SIGINT, &sigIntHandler, NULL) || sigaction(SIGTSTP, &sigIntHandler, NULL) || sigaction(SIGQUIT, &sigIntHandler, NULL) || 
-        sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL) ){
+        sigaction(SIGTERM, &sigIntHandler, NULL) || sigaction(SIGABRT, &sigIntHandler, NULL) || sigaction(SIGWINCH, &sigIntHandler, NULL)){
         halted();
         debugWrite("Failed to init handler", CU::DebugMsgType::ERROR);
         return;
@@ -231,6 +231,7 @@ void CU::Driver::disableHandler(){
     sigaction(SIGTERM, &action, nullptr);
     sigaction(SIGQUIT, &action, nullptr);
     sigaction(SIGABRT, &action, nullptr);
+    sigaction(SIGWINCH, &action, nullptr);
 
     debugWrite("Shutdown Handler");
 #endif
@@ -288,7 +289,7 @@ void CU::Driver::enableMouse(){
 #ifdef USE_NCURSES
     if(!terminalMouse.enabled){
         mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
-        std::cout << "\x1B[?1003h" << std::flush;
+//        std::cout << "\x1B[?1003h" << std::flush;
         terminalMouse.enabled = true;
         mouseinterval(0);
     }
@@ -304,7 +305,7 @@ void CU::Driver::enableMouse(){
 void CU::Driver::disableMouse(){
 #ifdef USE_NCURSES
     if(terminalMouse.enabled){
-        std::cout << "\x1B[?1003l" << std::flush;
+  //      std::cout << "\x1B[?1003l" << std::flush;
         terminalMouse.enabled = false;
     }
 #else
@@ -883,20 +884,15 @@ CU::keyCode CU::Driver::getKey() {
 
     terminalMouse.buttonMask = CU::MouseMask::NONE;
 
+    terminalMouse.scroll = 0;
+
     if(ch == KEY_MOUSE){
         MEVENT event;
         if(getmouse(&event) == OK){
             if(terminalMouse.enabled){
                 terminalMouse.blockX = event.x;
                 terminalMouse.blockY = event.y;
-                CU::debugWrite(std::to_string(event.x));
-                CU::debugWrite(std::to_string(event.y));
-                CU::debugWrite("---");
             }
-
-//            if(event.bstate & BUTTON1_CLICKED){
-//            }
-
             if(event.bstate & BUTTON1_PRESSED){
                 terminalMouse.buttonMask = CU::MouseMask::LBUTTON;
                 terminalMouse.clickX = event.x;
@@ -927,7 +923,12 @@ CU::keyCode CU::Driver::getKey() {
                 terminalMouse.clickX = event.x;
                 terminalMouse.clickY = event.y;
             }
-
+            if(event.bstate & 0x10000){
+                terminalMouse.scroll = -1;
+            }
+            if(event.bstate & 0x200000){
+                terminalMouse.scroll = 1;
+            }
         }
     }else
     if(ch == ERR){

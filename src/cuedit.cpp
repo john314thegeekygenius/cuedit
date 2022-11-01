@@ -11,6 +11,10 @@
 	*
 */
 
+// TODO:
+// Add terminal somehow
+// somthing like this? https://github.com/tmux/tmux
+
 #include "cuheads.h"
 
 CUEditor editor;
@@ -216,7 +220,6 @@ void CUEditor::run(){
 	int cx = 0;
 	int cy = 0;
 	while(running){
-		CU::Mouse_t termMouse = videoDriver.getMouse();
 
 		drawGUI();
 
@@ -1356,6 +1359,8 @@ void CUEditor::fixCursor(){
 };
 
 void CUEditor::doEditor(CU::keyCode key){
+	// Get mouse
+	CU::Mouse_t termMouse = videoDriver.getMouse();
 
 	// Get the character keys
 	if((int)key >= (int)CU::keyCode::k_space && (int)key <= (int)CU::keyCode::k_grave){
@@ -1438,13 +1443,22 @@ void CUEditor::doEditor(CU::keyCode key){
 		fileInfo[fileTabSelected].cursorY += 1;
 		fileInfo[fileTabSelected].cursorMovedDir = 3;
 	}
-
+	
 	if(key == CU::keyCode::s_pg_up){
 		fileInfo[fileTabSelected].cursorY -= 32;
 		fileInfo[fileTabSelected].cursorMovedDir = 2;
 	}
 	if(key == CU::keyCode::s_pg_down){
 		fileInfo[fileTabSelected].cursorY += 32;
+		fileInfo[fileTabSelected].cursorMovedDir = 3;
+	}
+
+	if(termMouse.scroll == -1){
+		fileInfo[fileTabSelected].cursorY -= 8;
+		fileInfo[fileTabSelected].cursorMovedDir = 2;
+	}
+	if(termMouse.scroll == 1){
+		fileInfo[fileTabSelected].cursorY += 8;
 		fileInfo[fileTabSelected].cursorMovedDir = 3;
 	}
 
